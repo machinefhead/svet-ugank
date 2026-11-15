@@ -5,10 +5,19 @@ Vsaka uganka ima stabilen `puzzleId`, revizijo, vrsto, nastavitve, definicijo in
 
 ## Osmosmerka
 - Pravilno ime v UI: »Osmosmerka«.
-- Resnične vse vodoravne, navpične in diagonalne smeri, naprej in nazaj.
-- Nastavitve: velikost mreže, število/tema/dolžina besed, težavnost in dovoljene smeri.
+- R2.1 za nove uganke ponuja tri prednastavitve. Izbira začne veljati z »Nova uganka«.
+
+| Stopnja | Mreža | Besede | Smeri | Prekrivanja |
+| --- | --- | --- | --- | --- |
+| Začetna | 6 × 6 | 4 dolžine 3–4 | Desno in dol | 0–1, cilj 0 |
+| Lahka | 8 × 8 | 6 dolžine 3–5 | Desno, dol, diagonali navzdol | 0–2, cilj 1 |
+| Srednja | 10 × 10 | 8 dolžine 4–7 | Vseh osem možnih; vsaj štiri različne, vsaj dve diagonalni in dve obratni postavitvi | 2–5, cilj 3 |
+
+- Prekrivanje šteje vsako ponovno uporabo črke na že zasedenem polju. Enoličnost velja v vseh osmih smereh, igralec pa sme označiti oba konca v kateremkoli vrstnem redu.
+- Model generatorja ločeno določa velikost, število in dolžino besed, dovoljene smeri, ciljno prekrivanje in polnilo. Začetna in lahka imata enakomerno polnilo, srednja uporabi pogostost črk iz besednega nabora.
+- Težka, zelo težka in ultra težka so predvidene po igralnem preizkusu prvih treh stopenj. Ročna izbira osi in tematski slovarji so prihodnje možnosti.
 - Slovenske besede in šumniki, brez nesmiselnih seznamov.
-- Gladko označevanje z miško in dotikom; najdene besede vidno označene (kljukica, izrazit slog).
+- Označevanje z miško, dotikom in tipkovnico. Najdene besede so zelene s kljukico na seznamu, napačna izbira rdeča z besedilom, namig oranžen z besedilom.
 - Težavnost ni zgolj velikost; povezana je tudi s prekrivanji, dolžinami, smermi, podobnostjo besed.
 
 ## Sudoku

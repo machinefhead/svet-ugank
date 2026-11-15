@@ -1,0 +1,13 @@
+export const alphabet = 'ABCČDEFGHIJKLMNOPRSŠTUVZŽ'
+
+export const words = [
+  'BUČA', 'ČEBELA', 'ČEŠNJA', 'ČOLN', 'DEŽ', 'DOLINA', 'DREVO', 'GOBA', 'GORA',
+  'GOZD', 'GROZDJE', 'HRUŠKA', 'JABOLKO', 'JEZERO', 'JEŽ', 'KAMEN', 'KAPLJA',
+  'KORUZA', 'KRAVA', 'KROKAR', 'LASTOVKA', 'LIPA', 'LISICA', 'LUBENICA',
+  'LUNA', 'MAVRICA', 'MEDVED', 'METULJ', 'MRAVLJA', 'OBLAK', 'OREH',
+  'OVCA', 'PIKAPOLONICA', 'PLANINA', 'PLOD', 'POMLAD', 'POTOK', 'RAKUN',
+  'REKA', 'RIBA', 'RIBNIK', 'SADOVNJAK', 'SKALOVJE',
+  'SLAP', 'SLIVA', 'SMREKA', 'SNEG', 'SONCE', 'SRNA', 'SOVA', 'ŠKOLJKA',
+  'ŠOPEK', 'ŠČINKAVEC', 'ŠTOR', 'TRAVA', 'TROBENTICA', 'TULIPAN', 'VEVERICA',
+  'VIHAR', 'VODA', 'VRABEC', 'ZAJEC', 'ZVEZDA', 'ŽABA', 'ŽELOD', 'ŽIRAFA',
+] as const

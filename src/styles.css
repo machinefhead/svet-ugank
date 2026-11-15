@@ -13,6 +13,10 @@
   --lemon: #f2dd98;
   --mint: #c4dcca;
   --tile-ink: #31283b;
+  --success-ink: light-dark(#195632, #b3edc6);
+  --success-fill: light-dark(#d6efdd, #214633);
+  --error-ink: light-dark(#a42b39, #ffb5ba);
+  --warning-ink: light-dark(#9b450a, #ffc58a);
   --heading: 'DM Serif Text', Georgia, serif;
   font-family: 'DM Sans', system-ui, sans-serif;
   background: var(--bg);
@@ -142,8 +146,8 @@ h1, h2 { font-family: var(--heading); font-weight: 400; margin: 0; }
 .spark-top { top: 13%; left: 15%; }
 .spark-bottom { bottom: 12%; right: 8%; color: #60477d; font-size: 6cqw; }
 
-.games { padding-bottom: 50px; }
-.games h2 { font-size: clamp(2rem, 3.8vw, 3rem); letter-spacing: -.045em; margin-bottom: 18px; }
+.games { padding-block: 27px 50px; }
+.games h1 { font-size: clamp(2.5rem, 5vw, 4.6rem); letter-spacing: -.05em; margin: 18px 0; }
 .game-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 [data-game="wordsearch"] { --tile: var(--peach); }
 [data-game="crossword"] { --tile: var(--lavender); }
@@ -162,6 +166,7 @@ h1, h2 { font-family: var(--heading); font-weight: 400; margin: 0; }
   background: var(--paper);
   color: var(--ink);
   text-align: left;
+  text-decoration: none;
 }
 .game-card:hover { border-color: var(--accent); }
 .game-icon {
@@ -185,6 +190,7 @@ h1, h2 { font-family: var(--heading); font-weight: 400; margin: 0; }
 .card-arrow { position: absolute; top: 19px; right: 19px; color: var(--muted); }
 
 .play { padding-block: 27px 52px; }
+.play-nav { display: flex; flex-wrap: wrap; gap: 22px; }
 .back-link { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; color: var(--accent); text-decoration: none; font-weight: 700; }
 .back-link:hover { text-decoration: underline; }
 .play-header { margin-block: 21px 26px; }
@@ -205,8 +211,7 @@ h1, h2 { font-family: var(--heading); font-weight: 400; margin: 0; }
   font-size: clamp(.9rem, 2.7vw, 1.35rem);
   font-weight: 650;
 }
-.board td.found, .word-list .found { background: var(--tile); color: var(--tile-ink); }
-.wordsearch-board { max-width: 378px; }
+.word-list .found, .letter-grid .found { background: var(--tile); color: var(--tile-ink); }
 .word-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 0; margin: 16px 0 0; list-style: none; }
 .word-list li { padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; font-size: .8rem; font-weight: 700; }
 .sudoku-board { border: 2px solid var(--muted); }
@@ -246,6 +251,93 @@ dialog::backdrop { background: #1e132c9e; }
 }
 .congratulations h2 { font-size: 3rem; }
 .congratulations p { margin: 8px 0 24px; color: var(--muted); }
+.confirmation h2 { font-size: 2rem; }
+.dialog-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+button:disabled { cursor: default; opacity: .62; }
+
+.board-instructions, .board-feedback { color: var(--muted); }
+.board-instructions { max-width: 490px; margin: 0 auto 12px; font-size: .875rem; }
+.board-feedback { max-width: 490px; margin: 14px auto 0; font-size: .875rem; }
+.board-feedback p { margin: 0 0 6px; min-height: 1.2em; }
+.letter-grid {
+  max-width: 490px;
+  margin-inline: auto;
+  border: 1px solid var(--line);
+  touch-action: none;
+  user-select: none;
+}
+.letter-grid.locked { touch-action: auto; }
+.letter-grid [role="row"] { display: grid; grid-template-columns: repeat(var(--size), minmax(0, 1fr)); }
+.letter-grid button {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: clamp(.87rem, 2.8vw, 1.3rem);
+  font-weight: 700;
+}
+.letter-grid button:focus-visible { position: relative; z-index: 1; outline-offset: -2px; }
+.letter-grid.locked button { cursor: default; }
+.letter-grid .solution { background: var(--lavender); color: var(--tile-ink); }
+[data-game="wordsearch"] :is(.word-list, .letter-grid) .found {
+  background: var(--success-fill);
+  color: var(--success-ink);
+}
+[data-game="wordsearch"] .letter-grid .selected { background: var(--action); color: var(--on-action); }
+.letter-grid .hinted { box-shadow: inset 0 0 0 2px var(--warning-ink); }
+.letter-grid .invalid { box-shadow: inset 0 0 0 2px var(--error-ink); }
+.board-message[data-tone="success"] { color: var(--success-ink); }
+.board-message[data-tone="error"] { color: var(--error-ink); }
+.board-message[data-tone="warning"] { color: var(--warning-ink); }
+.word-list .solution-word { padding: 0; }
+.solution-word button {
+  min-height: 36px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: inherit;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: inherit;
+}
+.solution-word button[aria-pressed="true"] { background: var(--lavender); color: var(--tile-ink); }
+
+.profile-panel {
+  max-width: 640px;
+  margin-block: 0 32px;
+  padding: clamp(14px, 2.5vw, 22px);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+.profile-panel h2 { font-size: 1.5rem; }
+.profile-panel p, .profile-panel label { color: var(--muted); }
+.profile-panel p:empty { display: none; }
+.profile-edit { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 6px; }
+.profile-edit input {
+  min-height: 44px;
+  min-width: 0;
+  width: min(100%, 14rem);
+  font: inherit;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+}
+.result-table { width: 100%; border-collapse: collapse; text-align: left; font-size: .875rem; }
+.result-table:not(:first-child) { margin-top: 12px; }
+.profile-panel summary { cursor: pointer; font-weight: 650; }
+.result-details, .legacy-results { margin-top: 12px; }
+.result-table caption { text-align: left; font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
+.result-table :is(th, td) { border-bottom: 1px solid var(--line); padding: 6px 4px; }
+.recent-results { padding-inline-start: 1.2rem; }
+.recent-results li { margin-block: 4px; }
+.result-note, .storage-notice { font-size: .875rem; }
+.storage-notice { padding: 12px; margin-block: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
 
 @media (max-width: 900px) {
   .wrap { width: calc(100% - 48px); }
@@ -268,4 +360,7 @@ dialog::backdrop { background: #1e132c9e; }
 @media (max-width: 355px) {
   .theme-label { position: absolute; clip-path: inset(50%); }
   .game-list { grid-template-columns: 1fr; }
+  main.wrap:has(#play[data-game="wordsearch"]:not([hidden])) { width: calc(100% - 16px); }
+  [data-game="wordsearch"] .board-panel { padding-inline: 6px; }
+  .board-instructions, .board-feedback { padding-inline: 6px; }
 }
