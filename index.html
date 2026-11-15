@@ -28,9 +28,9 @@
       <div id="catalog">
         <section class="hero" id="domov" aria-labelledby="hero-title">
           <div class="hero-copy">
-            <h1 id="hero-title">Svet<br> ugank<span aria-hidden="true">.</span></h1>
+            <h1 id="hero-title" tabindex="-1">Svet<br> ugank<span aria-hidden="true">.</span></h1>
             <p>Štiri igre za nekaj minut miru, radovednosti in razgibavanja možganov.</p>
-            <a class="button primary" id="start" href="#igre">Začni igrati <span aria-hidden="true">↓</span></a>
+            <a class="button primary" href="#igre">Začni igrati <span aria-hidden="true">→</span></a>
           </div>
           <div class="hero-art" aria-hidden="true">
             <span class="spark spark-top">✧</span>
@@ -49,36 +49,56 @@
           </div>
         </section>
 
-        <section class="games" id="igre" aria-labelledby="games-title">
-          <h2 id="games-title" tabindex="-1">Izberi igro</h2>
+        <section class="games" id="igre" aria-labelledby="games-title" hidden>
+          <a class="back-link" href="#domov"><span aria-hidden="true">←</span> Domov</a>
+          <h1 id="games-title" tabindex="-1">Izberi igro</h1>
           <div class="game-list" id="game-list"></div>
+          <section class="profile-panel" aria-labelledby="profile-title">
+            <h2 id="profile-title">Moji rezultati</h2>
+            <p id="storage-description">Napredek in rezultati so na tej napravi. Brisanje podatkov brskalnika jih odstrani.</p>
+            <form id="profile-form">
+              <label for="nickname">Lokalni vzdevek (neobvezno)</label>
+              <div class="profile-edit">
+                <input id="nickname" type="text" maxlength="24" placeholder="Gost" autocomplete="off">
+                <button class="button secondary" type="submit">Shrani vzdevek</button>
+              </div>
+            </form>
+            <p id="profile-status" role="status"></p>
+            <div id="results"></div>
+          </section>
         </section>
       </div>
 
       <section class="play" id="play" aria-labelledby="play-title" hidden>
-        <a class="back-link" id="back" href="#igre"><span aria-hidden="true">←</span> Vse igre</a>
+        <nav class="play-nav" aria-label="Igre">
+          <a class="back-link" href="#igre"><span aria-hidden="true">←</span> Vse igre</a>
+          <a class="back-link" href="#domov">Domov</a>
+        </nav>
         <div class="play-header">
-          <span class="sample-label">Vzorčni igralni zaslon</span>
+          <span class="sample-label" id="play-label"></span>
           <h1 id="play-title" tabindex="-1"></h1>
           <p id="play-description"></p>
         </div>
         <div class="play-layout">
           <div class="board-panel" id="board-panel"></div>
-          <aside class="play-options" aria-labelledby="options-title">
-            <h2 id="options-title">Nastavitve</h2>
-            <label for="difficulty">Težavnost</label>
+          <aside class="play-options" id="play-options" aria-labelledby="options-title">
+            <h2 id="options-title">Naslednja uganka</h2>
+            <label for="difficulty">Težavnost in velikost</label>
             <select id="difficulty">
-              <option value="Lahka">Lahka</option>
-              <option value="Srednja">Srednja</option>
-              <option value="Težka">Težka</option>
+              <option value="easy">Lahka · 8 × 8</option>
+              <option value="medium">Srednja · 10 × 10</option>
+              <option value="hard">Težka · 12 × 12</option>
             </select>
             <button class="button primary" id="new-puzzle" type="button">Nova uganka</button>
-            <p class="applied-difficulty" id="applied-difficulty" role="status"></p>
-            <button class="button secondary" id="show-congratulations" type="button">Prikaži vzorčno čestitko</button>
+            <p class="applied-difficulty" id="applied-difficulty"></p>
+            <button class="button secondary" id="hint" type="button" disabled>Namig</button>
+            <button class="button secondary" id="reveal" type="button" disabled>Pokaži rešitev</button>
           </aside>
         </div>
       </section>
     </main>
+
+    <p class="storage-notice wrap" id="storage-notice" role="status" hidden>Lokalno shranjevanje ni na voljo. Spremembe lahko izgubiš, ko zapreš ali osvežiš stran.</p>
 
     <dialog id="congratulations" aria-labelledby="congratulations-title" aria-describedby="congratulations-text">
       <form method="dialog" class="congratulations">
@@ -86,6 +106,16 @@
         <h2 id="congratulations-title">Bravo!</h2>
         <p id="congratulations-text">Uspešno si rešil uganko.</p>
         <button class="button primary" autofocus>Nazaj k uganki</button>
+      </form>
+    </dialog>
+    <dialog id="confirm" aria-labelledby="confirm-title" aria-describedby="confirm-text">
+      <form method="dialog" class="congratulations confirmation">
+        <h2 id="confirm-title"></h2>
+        <p id="confirm-text"></p>
+        <div class="dialog-actions">
+          <button class="button secondary" value="cancel" autofocus>Prekliči</button>
+          <button class="button primary" id="confirm-action" value="accept"></button>
+        </div>
       </form>
     </dialog>
     <script type="module" src="/src/main.ts"></script>

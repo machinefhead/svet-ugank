@@ -22,9 +22,15 @@
 
 ## Odprto
 - Končna paleta, naslovna ilustracija in izbrana grafična smer.
-- Točen frontend stack (minimalne odvisnosti).
 - Prva zbirka pravih skandinavskih križank in upravljanje slovenskega leksikona.
 - Podrobnosti offline datotek/paketov, izbira gostovanja in kasneje varni računi.
 - Kateri prototipni deli V3 so dejansko vredni ponovne uporabe.
 
 Novih odločitev ni dovoljeno prikrito izvajati kot že potrjenih.
+
+## Izvedba R2 — 15. 11. 2026
+
+- R2 uporablja TypeScript, Vite in DOM/CSS iz R1. Pogled je zapisan v delu naslova za znakom `#`, zato delujeta tudi gumba Nazaj in Naprej v brskalniku.
+- Lokalna shramba `localStorage` ima verzioniran zapis za temo, izbirni vzdevek, naslednjo prednastavitev, aktivno osmosmerko in osebne rezultate. Če zapis ni mogoč, je igranje še vedno na voljo v pomnilniku zavihka.
+- Osmosmerka se obnovi iz semena, prednastavitve in revizije generatorja. Tri prednastavitve spreminjajo velikost, število in dolžino besed ter izbiro prekrivanj. Vse uporabljajo osem smeri. Tema besed in ročna izbira smeri nista del R2.
+- Dva namiga označita začetni črki. Po potrjenem ogledu celotne rešitve ostane uganka za pregled, najdene besede se ohranijo, rezultat pa se ne zabeleži. Osebni časi z namigi in brez njih so ločeni. Lokalni čas od začetka vključuje premore.
