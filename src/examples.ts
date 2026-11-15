@@ -23,34 +23,10 @@ export const examples = {
   maze: {
     name: 'Labirint',
     description: 'Poišči pot od začetka do cilja.',
-    rows: [
-      '###########',
-      'S...#.....#',
-      '###.#.###.#',
-      '#...#.#...#',
-      '#.###.#.###',
-      '#.....#...#',
-      '#.#.#####.#',
-      '#.#.......F',
-      '###########',
-    ],
   },
 }
 
-export function renderDemo(game: Exclude<Game, 'wordsearch'>) {
-  if (game === 'maze') {
-    const rows = examples.maze.rows.map((row) => `
-      <tr>${Array.from(row, (cell) => {
-        if (cell === '#') return '<td class="wall" aria-label="Zid"></td>'
-        if (cell === 'S') return '<td class="maze-start" aria-label="Začetek">●</td>'
-        if (cell === 'F') return '<td class="maze-finish" aria-label="Cilj">★</td>'
-        return '<td aria-label="Pot"></td>'
-      }).join('')}</tr>
-    `).join('')
-    return `<table class="board maze-board" aria-label="Vzorčni labirint"><tbody>${rows}</tbody></table>
-      <p class="board-legend">● Začetek <span>★ Cilj</span></p>`
-  }
-
+export function renderDemo(game: 'crossword' | 'sudoku') {
   if (game === 'crossword') {
     const { clues, rows } = examples.crossword
     const clueCell = (clue: string, arrow: string, direction: string) =>

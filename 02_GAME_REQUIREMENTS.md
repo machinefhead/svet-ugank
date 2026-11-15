@@ -26,10 +26,11 @@ Vsaka uganka ima stabilen `puzzleId`, revizijo, vrsto, nastavitve, definicijo in
 - Tipkovnica, dotik in razumljivi namigi brez samodejnega razkritja rešitve.
 
 ## Labirint
-- Različne velikosti, več slepih ulic, razpotij, zavajajočih poti in različno zavite pravilne poti.
-- Težavnost upošteva tudi ovinke, dolžino poti, napačne odcepe in ne le mrežo.
-- Pri premikanju s prstom ni treba zadeti drobne pike; ne izgubljaj položaja ob zdrsu. Podpora tipkovnici in dotiku sosednjega polja.
-- Generirane poti vedno povezujejo začetek in cilj; testirati mnogo semen.
+- Prikazne mreže 13 × 13, 21 × 21, 33 × 33, 45 × 45 in 61 × 61. Velikost in težavnost (Lahka, Srednja, Zahtevna) sta neodvisni. Privzeto 13 × 13 in Lahka.
+- Generator revizije 1 izdela zvezno drevo z eno potjo do cilja. BFS preveri pot ter izmeri njeno dolžino, ovinke, razpotja na poti, slepe konce in največjo globino napačne veje.
+- Growing Tree primerja 15 kandidatov, po tri za vsako od petih verjetnosti izbire najnovejše aktivne celice. Prednost imajo poti dolžine vsaj 1,15-krat najkrajše geometrijske razdalje in z vsaj štirimi ovinki oziroma polovico logične širine, če je ta večja. Če se uvrstijo manj kot trije kandidati, se uporabijo vsi preverjeni kandidati. Dodatnih poskusov ni.
+- Znotraj istega semena in velikosti se stopnje določijo z najnižjo, srednjo in najvišjo oceno v skupini. Ocena je vsota dolžine poti, dveh točk na ovinek, šestih na razpotje in največje globine napačne veje, deljena z logično širino. Posamezne meritve se med stopnjami lahko prekrivajo.
+- Premik je omejen na eno odprto sosednje polje. Ohranjen je zadnji veljavni položaj pri zdrsu ali izgubi kazalca. Na voljo so tipkovnica, klik, dotik, vlečenje in smerni gumbi.
 
 ## Križanka
 - Cilj je **prava skandinavska križanka**: opisi v celicah mreže, puščice, gosta in smiselna križanja.

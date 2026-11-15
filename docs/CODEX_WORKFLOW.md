@@ -18,4 +18,10 @@ Močnejši model ni avtomatsko boljša izbira. Pred vsakim delom koordinator nav
 `Model: ... | Razmišljanje: ... | Naloga: ...`
 En konkretni cilj, dovoljen obseg, prepovedi, najmanjši smiselni testi, pričakovan diff. Pri daljših navodilih koordinator pripravi popoln TXT za copy/paste.
 
-Spreminjamo eno funkcionalno področje naenkrat. Pregled sprememb pred združitvijo; ni avtomatskega deploya.
+## Od naloge do pregleda
+
+1. Delo poteka samo v `machinefhead/svet-ugank`. Osveži `origin/main` in iz njega ustvari vejo `feat/…` ali `fix/…`. Ohrani obstoječe nedokončano delo.
+2. Uporabi obstoječe module TypeScript, Vite in DOM/CSS. Nove igre naj uporabijo skupne igralne kontrole in dialoge ter ohranijo obstoječe shranjene uganke in rezultate.
+3. Zaženi relevantne ciljne teste, minimalni regresijski smoke, `npm run build` in `git diff --check`. Obsežne teste dodaj le ob konkretni potrebi. Poročaj dejanske izide.
+4. Po uspešnem pregledu diffa naredi commit in običajen push razvojne veje ter odpri Draft PR proti `main`. Predaj povezavo, SHA, kratek opis sprememb ter preverjanja in omejitve. Morebitno dodatno odobritev platforme ali napako navedi ob predaji.
+5. Lastnik ali koordinator po pregledu izvede združitev. Codex ne združuje sam in neposredno ne commita v `main`. Ko lastnik vključi GitHub Pages, objavo iz `main` izvede GitHub Actions. Napaka gradnje mora ostati vidna v Actions.

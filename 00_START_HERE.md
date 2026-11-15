@@ -6,9 +6,9 @@ Cilj: lahka, lepo oblikovana slovenska igralnica z možnostjo ponavljanja kakovo
 
 ## Trenutno
 - ChatGPT Project »Svet ugank« je ustvarjen; predajni ZIP je dodan v Project.
-- Nov zaseben GitHub repozitorij `machinefhead/svet-ugank` je na voljo.
+- Repozitorij `machinefhead/svet-ugank` je ob preverjanju za R3 javen. Za objavo glej postopek za GitHub Pages v [09_GITHUB_SETUP.md](09_GITHUB_SETUP.md).
 - V3 je neodobren prototip. Nekatere zamisli in algoritme lahko ponovno uporabimo šele po pregledu.
-- R1 je vizualni prototip. R2 dodaja igralno Osmosmerko in lokalne rezultate; preostale tri igre so DEMO. Za lokalni zagon glej [README](README.md).
+- R1 je vizualni prototip. R2 dodaja igralno Osmosmerko in lokalne rezultate, R3 pa igralni Labirint. Sudoku in Skandinavska križanka ostajata DEMO. Za lokalni zagon glej [README](README.md).
 
 ## Prve prioritete
 1. Potrditi dokumentacijo in pregledati začetni GitHub PR.

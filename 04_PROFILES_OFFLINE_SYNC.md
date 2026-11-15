@@ -3,13 +3,15 @@
 ## Trenutna potrjena faza
 - Igranje brez registracije ali strežniškega računa.
 - Izbirni **lokalni vzdevek**, nikoli lažna globalna prijava.
-- Shranjevanje nastavitev, lokalne statistike in napredka na napravi, predvidoma IndexedDB.
+- Nastavitve, osebna statistika in napredek so v `localStorage`. Za prihodnje večje pakete je predviden IndexedDB.
 - Izvoz/uvoz lastnega napredka kot varnostna kopija, če je izvedljivo v fazi.
 - Opozorilo, da brisanje podatkov brskalnika lahko odstrani lokalni napredek.
 - Brez shranjevanja gesel v datotekah, JavaScriptu, LocalStorage ali Githubu.
 - Lokalna statistika ni javna lestvica.
 
 V R2.1 je povzetek profila na naslovnici pod ilustracijo in gumbom »Začni igrati«. Aplikacija prebere stari zapis `svet-ugank:r2` in ob naslednjem shranjevanju zapiše shemo 2. Aktivna uganka R2 še naprej uporablja generator revizije 1, vključno z najdenimi besedami, namigi in stanjem ogleda rešitve. Stara nastavitev »Težka« za naslednjo uganko postane »Srednja«. Časi prejšnje revizije so v zgodovini R2, osebni rekordi R2.1 pa veljajo znotraj iste stopnje in so ločeni glede na uporabo namigov.
+
+Labirint uporablja ločen ključ `svet-ugank:maze`. Aktivno mrežo obnovi iz konfiguracije, semena in revizije, skupaj s položajem, prehojeno sledjo, koraki, namigi in stanjem zaključka oziroma ogleda rešitve. Rezultat se zapiše enkrat na ID uganke, čas je informativen ter vključuje premore. Ponoven začetek iste uganke ohrani označbo ogleda in število namigov. Povzetek na naslovnici loči zaključke z namigi in brez njih. Podatki so vezani na izvor strani, zato sta localhost in GitHub Pages ločeni shrambi.
 
 ## Offline igranje
 - Ko ima povezavo, igralec prenese aplikacijo in določen paket ugank (PWA).

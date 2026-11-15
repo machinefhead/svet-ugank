@@ -1,7 +1,7 @@
 # 08 — Register odločitev
 
 ## Potrjeno 15. 11. 2026
-- Projekt »Svet ugank« koordinirava v ChatGPT Project; git repozitorij je `machinefhead/svet-ugank` (zaseben).
+- Projekt »Svet ugank« koordinirava v ChatGPT Project. Lastnik je odobril javno vidnost `machinefhead/svet-ugank` in javni GitHub Pages.
 - Za prvo izdajo samo **Osmosmerka, Skandinavska križanka, Sudoku, Labirint**; kasneje počasi nove vrste.
 - Privzeti slovenski UI; otrokom prijazna in dostopna uporaba brez prisile registracije.
 - Landing z ilustracijo in »Začni igrati«, ne neposredno naključna igra.
@@ -14,7 +14,7 @@
 - Modularna koda, offline PWA, preneseni paketi, možnost samostojnega HTML izvoza.
 - **Novo:** najprej samo lokalni vzdevek/napredek brez prijave; pravi računi (ime+geslo brez obvezne e-pošte), strežniška sinhronizacija in skupne lestvice **so odloženi v poznejšo fazo**.
 - V3 ostane zgolj arhivska referenca, ne avtomatska osnova nove implementacije.
-- Codex dela v ločenih vejah z majhnimi nalogami; pregled pred združitvijo; javnega gostovanja ne spreminjamo.
+- Codex dela v ločenih vejah z majhnimi nalogami. Združitev razvojne veje potrdi in izvede lastnik ali koordinator po pregledu.
 
 ## Začasno potrjeno 15. 11. 2026 — R1
 
@@ -23,7 +23,7 @@
 ## Odprto
 - Končna paleta, naslovna ilustracija in izbrana grafična smer.
 - Prva zbirka pravih skandinavskih križank in upravljanje slovenskega leksikona.
-- Podrobnosti offline datotek/paketov, izbira gostovanja in kasneje varni računi.
+- Podrobnosti offline datotek in paketov, poznejši izvoz/uvoz ter varni računi.
 - Kateri prototipni deli V3 so dejansko vredni ponovne uporabe.
 
 Novih odločitev ni dovoljeno prikrito izvajati kot že potrjenih.
@@ -41,3 +41,9 @@ Novih odločitev ni dovoljeno prikrito izvajati kot že potrjenih.
 - ID novih ugank vsebuje `r2`. Generator, prednastavitve, vrstni red smeri in besedni nabor za `r1` so del zapisa prvotnih ugank. Sprememba podatkov ali pravil, ki spremeni postavitev iz istega semena, zahteva novo revizijo.
 - Aktivne stopnje so Začetna, Lahka in Srednja. Prva uporablja desno in dol, druga doda diagonali navzdol, tretja doda tudi obratne smeri. Pragovi in ciljna križanja so v [zahtevah za igre](02_GAME_REQUIREMENTS.md). Zahtevnost še čaka na igralni preizkus.
 - Profil je pod naslovnico. Zelen uspeh, rdeča napaka in oranžen namig imajo tudi besedni status; seznam najdenih besed vključuje kljukico.
+
+## Izvedba R3 — Naloga 06
+
+- Labirint uporablja determinističen Growing Tree revizije 1 in neodvisni izbiri velikosti in težavnosti. Obstoječ recept za obnovo mora ostati dostopen ob uvedbi prihodnje revizije.
+- Osmosmerka in Labirint imata skupne akcije nad mrežo in uporabljata iste potrditvene in čestitne dialoge. Labirint uporablja ločeno lokalno shrambo.
+- GitHub Pages je predviden pod `/svet-ugank/`. Po preverjenih testih Codex pripravi commit, običajen push razvojne veje in Draft PR. Po potrjeni združitvi lahko GitHub Actions objavi iz `main`, ko lastnik vključi Pages. Nastavitve in koraki so v [09_GITHUB_SETUP.md](09_GITHUB_SETUP.md).

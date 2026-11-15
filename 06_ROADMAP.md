@@ -6,6 +6,7 @@
 - **R2 – Prva igralna Osmosmerka:** ločeni pogledi naslovnice, izbora in igre, lokalni vzdevek, tema, napredek in osebni časi. Osmosmerka ima tri prednastavitve, dva namiga ter potrjen ogled rešitve brez rezultata. Sudoku, Labirint in Skandinavska križanka so statični prikazi DEMO.
 - **R2.1 – Postavitev in povratne informacije:** generator revizije 2, stopnje Začetna, Lahka in Srednja, pomensko obarvan odziv in lokalni profil na naslovnici. Aktivne uganke in zgodovina R2 ostanejo dostopne. Pred uvedbo težjih stopenj sledi igralni preizkus prvih treh.
 - **R3 – Kakovost štirih iger:** osmosmerka, sudoku, labirint, prava skandinavska križanka; vsako posebej s preizkusi in pregledom.
+  - **R3 / Naloga 06 za pregled:** igralni Labirint z lokalnim napredkom, skupne kontrole nad mrežo in priprava GitHub Pages. Sledi igralni pregled težavnosti in dotika na fizičnem telefonu ter potrjena združitev. Sudoku in Skandinavska križanka ostajata DEMO.
 - **R4 – Offline:** PWA, preneseni paketi in ohranjen lokalni napredek; preizkus na pravem telefonu.
 - **R5 – Zasebno/javno testiranje:** uporabnost, odprava napak, pregled zasebnosti ter zbiranje neinvazivnih agregiranih odzivov.
 - **Kasneje:** pravi spletni računi, sinhronizacija in skupne lestvice; PDF/tisk, nove vrste, trgovina.
