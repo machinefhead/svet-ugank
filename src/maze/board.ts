@@ -1,5 +1,6 @@
 import { directions, type Direction, type MazePuzzle } from './model.ts'
 import { adjacent, canMove } from './solver.ts'
+import { cellsAlongSegment, legalDragSteps, type PointerPoint } from './pointer.ts'
 import type { MazePlay } from './session.ts'
 
 const keyboard: Readonly<Record<string, Direction>> = {
@@ -52,6 +53,7 @@ export function mountMazeBoard(
   grid.replaceChildren(...cells)
   let position = puzzle.start
   let pointer: number | null = null
+  let lastPointer: PointerPoint | null = null
   let locked = false
   let panning = false
   let hintCell: number | null = null
@@ -100,25 +102,50 @@ export function mountMazeBoard(
     return tile && grid.contains(tile) ? Number(tile.dataset.cell) : -1
   }
 
+  function followPointer(event: PointerEvent) {
+    if (lastPointer === null || locked) return
+    const rect = grid.getBoundingClientRect()
+    const at: PointerPoint = { x: event.clientX - rect.left, y: event.clientY - rect.top }
+    const candidates = cellsAlongSegment(puzzle.width, rect.width / puzzle.width, lastPointer, at)
+    // Interpolate only along the drawn pointer segment. Each move still passes
+    // the existing wall/adjacency rules and stops at the first invalid cell.
+    for (const next of legalDragSteps(puzzle, position, candidates)) {
+      if (locked) break
+      move(next)
+    }
+    // keepInView can scroll the viewport while moving; store the pointer
+    // relative to the grid *after* any automatic scrolling.
+    const updatedRect = grid.getBoundingClientRect()
+    lastPointer = { x: event.clientX - updatedRect.left, y: event.clientY - updatedRect.top }
+  }
+
   grid.addEventListener('pointerdown', (event) => {
     if (panning || locked || pointer !== null || !event.isPrimary || event.button !== 0) return
     const cell = cellAt(event)
+    // Starting a drag on a distant wall/tile must not move the player.
+    if (cell < 0 || (cell !== position && !canMove(puzzle, position, cell))) return
     pointer = event.pointerId
     grid.setPointerCapture(pointer)
     viewport.focus({ preventScroll: true })
     if (cell !== position) move(cell)
+    const rect = grid.getBoundingClientRect()
+    lastPointer = { x: event.clientX - rect.left, y: event.clientY - rect.top }
+    event.preventDefault()
   })
-
   grid.addEventListener('pointermove', (event) => {
-    if (event.pointerId !== pointer || locked) return
-    const cell = cellAt(event)
-    // Ignore jumps and walls. A fast drag has to return to a neighboring tile.
-    if (canMove(puzzle, position, cell)) move(cell)
+    if (event.pointerId === pointer) followPointer(event)
   })
-
-  for (const event of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) {
-    grid.addEventListener(event, ({ pointerId }) => {
-      if (pointerId === pointer) pointer = null
+  grid.addEventListener('pointerup', (event) => {
+    if (event.pointerId !== pointer) return
+    followPointer(event) // Some quick swipes deliver their final point only on pointerup.
+    pointer = null
+    lastPointer = null
+  })
+  for (const type of ['pointercancel', 'lostpointercapture'] as const) {
+    grid.addEventListener(type, (event) => {
+      if (event.pointerId !== pointer) return
+      pointer = null
+      lastPointer = null
     })
   }
 
