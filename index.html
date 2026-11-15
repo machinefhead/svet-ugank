@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="sl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Svet ugank – osmosmerka, skandinavska križanka, sudoku in labirint.">
+    <title>Svet ugank</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap header-inner">
+        <a class="brand" href="#domov">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          Svet ugank
+        </a>
+        <label class="theme-picker">
+          <span class="theme-label">Tema</span>
+          <select id="theme">
+            <option value="system">Sistemska</option>
+            <option value="light">Svetla</option>
+            <option value="dark">Temna</option>
+          </select>
+        </label>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <div id="catalog">
+        <section class="hero" id="domov" aria-labelledby="hero-title">
+          <div class="hero-copy">
+            <h1 id="hero-title">Svet<br> ugank<span aria-hidden="true">.</span></h1>
+            <p>Štiri igre za nekaj minut miru, radovednosti in razgibavanja možganov.</p>
+            <a class="button primary" id="start" href="#igre">Začni igrati <span aria-hidden="true">↓</span></a>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <span class="spark spark-top">✧</span>
+            <span class="spark spark-bottom">✦</span>
+            <div class="art-letter">
+              <span>U</span><span>G</span><span>A</span>
+              <span>M</span><span>I</span><span>N</span>
+              <span>S</span><span>L</span><span>K</span>
+            </div>
+            <div class="art-number">
+              <span>5</span><span></span><span>3</span>
+              <span></span><span>7</span><span></span>
+              <span>2</span><span></span><span>9</span>
+            </div>
+            <div class="art-maze"><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+        </section>
+
+        <section class="games" id="igre" aria-labelledby="games-title">
+          <h2 id="games-title" tabindex="-1">Izberi igro</h2>
+          <div class="game-list" id="game-list"></div>
+        </section>
+      </div>
+
+      <section class="play" id="play" aria-labelledby="play-title" hidden>
+        <a class="back-link" id="back" href="#igre"><span aria-hidden="true">←</span> Vse igre</a>
+        <div class="play-header">
+          <span class="sample-label">Vzorčni igralni zaslon</span>
+          <h1 id="play-title" tabindex="-1"></h1>
+          <p id="play-description"></p>
+        </div>
+        <div class="play-layout">
+          <div class="board-panel" id="board-panel"></div>
+          <aside class="play-options" aria-labelledby="options-title">
+            <h2 id="options-title">Nastavitve</h2>
+            <label for="difficulty">Težavnost</label>
+            <select id="difficulty">
+              <option value="Lahka">Lahka</option>
+              <option value="Srednja">Srednja</option>
+              <option value="Težka">Težka</option>
+            </select>
+            <button class="button primary" id="new-puzzle" type="button">Nova uganka</button>
+            <p class="applied-difficulty" id="applied-difficulty" role="status"></p>
+            <button class="button secondary" id="show-congratulations" type="button">Prikaži vzorčno čestitko</button>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="congratulations" aria-labelledby="congratulations-title" aria-describedby="congratulations-text">
+      <form method="dialog" class="congratulations">
+        <span class="celebration" aria-hidden="true">✦</span>
+        <h2 id="congratulations-title">Bravo!</h2>
+        <p id="congratulations-text">Uspešno si rešil uganko.</p>
+        <button class="button primary" autofocus>Nazaj k uganki</button>
+      </form>
+    </dialog>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
