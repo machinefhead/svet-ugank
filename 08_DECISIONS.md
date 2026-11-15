@@ -16,6 +16,10 @@
 - V3 ostane zgolj arhivska referenca, ne avtomatska osnova nove implementacije.
 - Codex dela v ločenih vejah z majhnimi nalogami; pregled pred združitvijo; javnega gostovanja ne spreminjamo.
 
+## Začasno potrjeno 15. 11. 2026 — R1
+
+- Lastnik je začasno potrdil vizualni prototip R1, posebej njegovo temno smer. Svetla in sistemska različica ostajata v trenutni obliki do nadaljnjega pregleda. Končna paleta ostaja odprta.
+
 ## Odprto
 - Končna paleta, naslovna ilustracija in izbrana grafična smer.
 - Točen frontend stack (minimalne odvisnosti).
