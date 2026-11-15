@@ -1,5 +1,6 @@
 import './styles.css'
 import { examples, renderDemo, type Game } from './examples.ts'
+import { setupMaze } from './maze/game.ts'
 import { formatTime, renderResults } from './profile.ts'
 import { isTheme, normalizeNickname, openLocalData } from './storage.ts'
 import { mountBoard } from './wordsearch/board.ts'
@@ -26,9 +27,16 @@ const confirmDialog = element<HTMLDialogElement>('confirm')
 const newPuzzle = element<HTMLButtonElement>('new-puzzle')
 const hint = element<HTMLButtonElement>('hint')
 const reveal = element<HTMLButtonElement>('reveal')
+const applied = element('applied-difficulty')
+const nextDirections = element('next-directions')
 
 const local = openLocalData(() => window.localStorage)
 const { data } = local
+const maze = setupMaze({
+  panel: boardPanel, size: element<HTMLSelectElement>('maze-size'), level: element<HTMLSelectElement>('maze-level'),
+  applied, hint, reveal, ask, congratulate, storageChanged: showStorageStatus,
+})
+
 let puzzle = local.puzzle
 let board: ReturnType<typeof mountBoard> | null = null
 
@@ -42,6 +50,7 @@ const icons: Record<Game, string> = {
   maze: '<span></span><span></span><span></span><span>●</span>',
 }
 const gameIds = Object.keys(routes) as Game[]
+const isPlayable = (game: Game) => game === 'wordsearch' || game === 'maze'
 for (const game of gameIds) {
   const { name, description } = examples[game]
   const card = document.createElement('a')
@@ -51,16 +60,17 @@ for (const game of gameIds) {
   card.innerHTML = `
     <span class="game-icon" aria-hidden="true">${icons[game]}</span>
     <span class="card-name">${name}</span>
-    <span class="card-description">${game === 'wordsearch' ? description : 'DEMO · Samo vzorčni prikaz'}</span>
+    <span class="card-description">${isPlayable(game) ? description : 'DEMO · Samo vzorčni prikaz'}</span>
     <span class="card-arrow" aria-hidden="true">↗</span>`
   gameList.append(card)
 }
 
 function showStorageStatus() {
-  element('storage-notice').hidden = local.available
-  element('storage-description').textContent = local.available
+  const available = local.available && maze.available
+  element('storage-notice').hidden = available
+  element('storage-description').textContent = available
     ? 'Napredek in rezultati so na tej napravi. Brisanje podatkov brskalnika jih odstrani.'
-    : 'Rezultati so na voljo samo v tem odprtem zavihku, ker lokalno shranjevanje ni na voljo.'
+    : 'Če shranjevanje za igro ni na voljo, je njen novi napredek viden samo v tem zavihku.'
 }
 
 function save() {
@@ -89,7 +99,7 @@ for (const [level, { label, size }] of Object.entries(presets)) {
 }
 
 function showNextDirections() {
-  element('next-directions').textContent = presets[data.nextLevel].directionLabel
+  nextDirections.textContent = presets[data.nextLevel].directionLabel
 }
 
 difficulty.value = data.nextLevel
@@ -128,7 +138,7 @@ function mountWordsearch() {
   board = mountBoard(boardPanel, puzzle, select)
   const { label, directionLabel } = describePreset(puzzle.level, puzzle.revision)
   const legacy = puzzle.revision === 1 ? ' (R2)' : ''
-  element('applied-difficulty').textContent =
+  applied.textContent =
     `Trenutno: ${label}${legacy} · ${puzzle.size} × ${puzzle.size} · ${directionLabel}`
   updateBoard()
 }
@@ -167,8 +177,7 @@ function select(from: number, to: number) {
     const detail = data.results !== previous && result
       ? ` Čas: ${formatTime(result.elapsedMs)}. ${saved ? 'Rezultat je shranjen na tej napravi.' : 'Rezultat je viden v tem zavihku.'}`
       : ''
-    element('congratulations-text').textContent = 'Našel si vse skrite besede.' + detail
-    congratulations.showModal()
+    congratulate('Našel si vse skrite besede.' + detail)
   } else {
     save()
     updateBoard()
@@ -176,22 +185,28 @@ function select(from: number, to: number) {
   }
 }
 
-let pendingAction: (() => void) | null = null
+function congratulate(message: string) {
+  element('congratulations-text').textContent = message
+  congratulations.showModal()
+}
+
+let pendingAction: { route: string; run: () => void } | null = null
 function ask(title: string, text: string, action: string, run: () => void) {
   element('confirm-title').textContent = title
   element('confirm-text').textContent = text
   element('confirm-action').textContent = action
-  pendingAction = run
+  pendingAction = { route: location.hash, run }
   confirmDialog.returnValue = 'cancel'
   confirmDialog.showModal()
 }
 confirmDialog.addEventListener('close', () => {
-  const run = pendingAction
+  const action = pendingAction
   pendingAction = null
-  if (confirmDialog.returnValue === 'accept' && location.hash === '#osmosmerka') run?.()
+  if (confirmDialog.returnValue === 'accept' && action?.route === location.hash) action.run()
 })
 
 newPuzzle.addEventListener('click', () => {
+  if (location.hash === '#labirint') return maze.newPuzzle()
   const replace = () => { if (createPuzzle()) board?.focus() }
   if (puzzle && data.play && !isComplete(puzzle, data.play.found)) {
     ask('Začneš novo uganko?', 'Trenutna uganka še ni rešena. Z novo uganko izgubiš njen napredek.',
@@ -199,6 +214,7 @@ newPuzzle.addEventListener('click', () => {
   } else replace()
 })
 hint.addEventListener('click', () => {
+  if (location.hash === '#labirint') return maze.hint()
   if (!puzzle || !data.play || !board) return
   const next = useHint(puzzle, data.play)
   if (next === data.play) return
@@ -209,6 +225,7 @@ hint.addEventListener('click', () => {
   board.focusHint(next.hints.at(-1)!)
 })
 reveal.addEventListener('click', () => {
+  if (location.hash === '#labirint') return maze.reveal()
   if (!data.play || !board) return
   ask('Pokažem rešitev?', 'Ogled ne spremeni najdenih besed. Po ogledu bo uganka ostala za pregled in se ne bo štela med rezultate.',
     'Pokaži rešitev', () => {
@@ -236,21 +253,29 @@ function renderRoute(focus: boolean) {
     nickname.value = data.nickname
     profileStatus.textContent = ''
     renderResults(element('results'), data)
+    maze.renderResults(element('maze-results'))
   } else if (game) {
     heading = playTitle
     play.dataset.game = game
     playTitle.textContent = examples[game].name
-    element('play-label').textContent = game === 'wordsearch' ? 'Igralna uganka' : 'DEMO · Vzorčni prikaz'
-    element('play-description').textContent = game === 'wordsearch' ? examples[game].description :
+    element('play-label').textContent = isPlayable(game) ? 'Igralna uganka' : 'DEMO · Vzorčni prikaz'
+    element('play-description').textContent = isPlayable(game) ? examples[game].description :
       'To je statičen prikaz zaslona. Reševanje v tej različici še ni na voljo.'
-    element('play-options').hidden = game !== 'wordsearch'
+    element('play-options').hidden = !isPlayable(game)
+    element('wordsearch-fields').hidden = game !== 'wordsearch'
+    element('maze-fields').hidden = game !== 'maze'
+    nextDirections.hidden = game !== 'wordsearch'
+    applied.textContent = ''
     boardPanel.replaceChildren()
     board = null
     if (game === 'wordsearch') {
       hint.disabled = reveal.disabled = !puzzle
+      hint.textContent = 'Namig'
+      reveal.textContent = 'Pokaži rešitev'
       if (puzzle && data.play) mountWordsearch()
       else createPuzzle()
-    } else boardPanel.innerHTML = renderDemo(game)
+    } else if (game === 'maze') maze.open()
+    else boardPanel.innerHTML = renderDemo(game)
   }
   if (focus) {
     window.scrollTo(0, 0)

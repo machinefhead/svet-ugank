@@ -62,6 +62,7 @@
             </form>
             <p id="profile-status" role="status"></p>
             <div id="results"></div>
+            <div id="maze-results"></div>
           </section>
         </div>
 
@@ -83,18 +84,32 @@
           <p id="play-description"></p>
         </div>
         <div class="play-layout">
-          <div class="board-panel" id="board-panel"></div>
-          <aside class="play-options" id="play-options" aria-labelledby="options-title">
-            <h2 id="options-title">Naslednja uganka</h2>
-            <label for="difficulty">Težavnost in velikost</label>
-            <select id="difficulty" aria-describedby="next-directions">
-            </select>
+          <section class="play-options" id="play-options" aria-labelledby="options-title">
+            <h2 id="options-title">Nastavitve in dejanja</h2>
+            <div class="toolbar-row">
+              <div class="toolbar-fields" id="wordsearch-fields">
+                <label for="difficulty">Težavnost in velikost naslednje uganke
+                  <select id="difficulty" aria-describedby="next-directions"></select>
+                </label>
+              </div>
+              <div class="toolbar-fields" id="maze-fields" hidden>
+                <label for="maze-size">Velikost naslednje uganke
+                  <select id="maze-size"></select>
+                </label>
+                <label for="maze-level">Težavnost naslednje uganke
+                  <select id="maze-level"></select>
+                </label>
+              </div>
+              <div class="toolbar-actions">
+                <button class="button primary" id="new-puzzle" type="button">Nova uganka</button>
+                <button class="button secondary" id="hint" type="button" disabled>Namig</button>
+                <button class="button secondary" id="reveal" type="button" disabled>Pokaži rešitev</button>
+              </div>
+            </div>
             <p class="applied-difficulty" id="next-directions"></p>
-            <button class="button primary" id="new-puzzle" type="button">Nova uganka</button>
             <p class="applied-difficulty" id="applied-difficulty"></p>
-            <button class="button secondary" id="hint" type="button" disabled>Namig</button>
-            <button class="button secondary" id="reveal" type="button" disabled>Pokaži rešitev</button>
-          </aside>
+          </section>
+          <div class="board-panel" id="board-panel"></div>
         </div>
       </section>
     </main>

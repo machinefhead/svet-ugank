@@ -4,7 +4,7 @@
 
 Za vsako nalogo preberi `00_START_HERE.md`, `08_DECISIONS.md` in relevantne specifikacije, preden spremeniš kodo.
 
-- Delaš **samo** izrecno naročeno nalogo, v ločeni veji. Ne uvajaj novih vrst ugank, računov, backend storitev ali plačil samovoljno.
+- Delaš **samo** izrecno naročeno nalogo v tem repozitoriju. Pred razvojem osveži `origin/main` in iz njega odpri ločeno vejo `feat/…` ali `fix/…`. Ohrani obstoječe nedokončano delo. Ne uvajaj novih vrst ugank, računov, backend storitev ali plačil samovoljno.
 - Osnovne igre: Osmosmerka, Skandinavska križanka, Sudoku, Labirint.
 - V3 ni potrjena produkcijska osnova. Arhiva ne uporabljaj, če ni dejansko na voljo; v tem primeru to povej.
 - Algoritemska logika, podatki in UI so ločeni. Preverjaj rešitve ter enoličnost, kjer je potrebna.
@@ -14,6 +14,7 @@ Za vsako nalogo preberi `00_START_HERE.md`, `08_DECISIONS.md` in relevantne spec
 - Razkritje celotne rešitve samo po namerni potrditvi; ne spreminjaj rešitvenega stanja ob ogledu.
 - Najprej lokalni napredek brez gesel. Pravi računi, skupna lestvica in strežniška sinhronizacija so **odloženi**.
 - Ne dotikaj se obstoječe javne strani ali drugih repozitorijev. Brez skrivnosti in osebnih podatkov v repozitoriju.
-- Testi: relevantni ciljni + minimalni smoke; polni suite le če je sprememba rizična ali posebej zahtevana.
-- Poročilo: spremenjene datoteke, dejansko izvedeni testi (PASS/FAIL), diff, omejitve, potencialne nejasnosti.
-- Lastnik potrdi združitev ali objavo. Brez nenaročenega deploya.
+- Pred zaključkom izvedi relevantne ciljne teste, minimalni regresijski smoke, `npm run build` in `git diff --check`. Celoten težki nabor zaženi le ob konkretni potrebi ali izrecni zahtevi.
+- Po uspešnem preverjanju preglej diff, commitaj in običajno potisni svojo razvojno vejo. Odpri Draft PR proti `main`. Poročaj URL, SHA, spremenjene datoteke, dejansko izvedene teste (PASS/FAIL) in omejitve. Če platforma zahteva ločeno odobritev ali dejanje spodleti, jasno poročaj.
+- `main` je stabilna veja. Codex vanjo neposredno ne commita ali potiska in razvojnega PR ne združi sam. Po pregledu združitev izvede lastnik ali koordinator.
+- Javna vidnost repozitorija in javni GitHub Pages sta odobrena 15. 11. 2026. Dejanski status preveri. Nastavitve GitHuba upravlja lastnik. Ko je Pages omogočen, GitHub Actions objavlja samo iz `main` po potrjeni združitvi. Razvojne veje in PR ne objavljajo.

@@ -2,13 +2,17 @@
 
 Slovenska spletna igralnica za otroke in odrasle. Začetni razvoj: **Osmosmerka, Križanka, Sudoku, Labirint**.
 
-**Status R2.1:** Osmosmerka ima stopnje Začetna, Lahka in Srednja. Skandinavska križanka, Sudoku in Labirint so vzorčni prikazi DEMO. Vzdevek, tema, aktivna uganka in osebni rezultati so shranjeni v brskalniku na tej napravi. Aktivno uganko R2 lahko nadaljuješ, prejšnji časi pa so v zgodovini R2 na naslovnici.
+**Status R3:** Osmosmerka in Labirint sta igralna. Skandinavska križanka in Sudoku sta vzorčna prikaza DEMO. Brskalnik hrani lokalni vzdevek, temo, aktivni uganki in osebne rezultate. Aktivno Osmosmerko R2 lahko nadaljuješ, prejšnji časi pa so v zgodovini R2 na naslovnici.
 
 ## Lokalni zagon
 
-Z Node.js 24 v projektni mapi zaženi `npm ci` in `npm run dev`, nato odpri lokalni naslov, ki ga izpiše Vite. Za preverjanje uporabi `npm test` in `npm run build`.
+Z Node.js 24 v projektni mapi zaženi `npm ci` in `npm run dev`, nato odpri lokalni naslov, ki ga izpiše Vite. Ciljni preizkusi Labirinta in shrambe tečejo z `node --test tests/maze.test.mjs tests/storage.test.mjs`. Produkcijsko gradnjo preveri z `npm run build` in `npm run preview`.
 
 Za hiter pregled na naslovnici po želji nastavi vzdevek, nato prek »Začni igrati« odpri Osmosmerko. Najdi besedo, spremeni težavnost in osveži stran. Ista mreža in zelena najdena beseda morata ostati prikazani. Novo stopnjo uveljavi z »Nova uganka« in potrditvijo zamenjave. Po dokončanju se vrni na naslovnico in preveri en zapis v »Mojih rezultatih«. Na telefonu preizkusi vlečenje ali dva dotika končnih črk.
+
+V Labirintu uporabi smerne gumbe, puščice na fokusirani mreži, dotik sosednjega polja ali vlečenje po hodniku. Za veliko mrežo sta pod njo »Povečava« in »Drsenje mreže«. »Na začetek« ohrani isto mrežo. Namig označi samo naslednji korak. Potrjen ogled rešitve izključi rezultat za to uganko tudi po ponovnem začetku.
+
+Gradnja uporablja pot `/svet-ugank/`. Postopek prve objave po potrjeni združitvi in nastavitev Pages sta v [navodilih za GitHub](09_GITHUB_SETUP.md). Lokalni napredek z localhosta na github.io ne preide samodejno.
 
 ## Začni tukaj
 1. [00_START_HERE.md](00_START_HERE.md) — aktualno stanje in omejitve
