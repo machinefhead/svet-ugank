@@ -5,7 +5,7 @@ import { isTheme, normalizeNickname, openLocalData } from './storage.ts'
 import { mountBoard } from './wordsearch/board.ts'
 import { isComplete } from './wordsearch/checker.ts'
 import { generatePuzzle } from './wordsearch/generator.ts'
-import { hintLimit, isLevel, presets, puzzleId } from './wordsearch/model.ts'
+import { describePreset, hintLimit, isLevel, presets, puzzleId } from './wordsearch/model.ts'
 import { recordResult, selectWord, startPuzzle, useHint } from './wordsearch/session.ts'
 
 const element = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T
@@ -84,10 +84,20 @@ profileForm.addEventListener('submit', (event) => {
   profileStatus.textContent = save() ? 'Vzdevek je posodobljen na tej napravi.' : 'Vzdevek je posodobljen v tem zavihku.'
   renderResults(element('results'), data)
 })
+for (const [level, { label, size }] of Object.entries(presets)) {
+  difficulty.add(new Option(`${label} · ${size} × ${size}`, level))
+}
+
+function showNextDirections() {
+  element('next-directions').textContent = presets[data.nextLevel].directionLabel
+}
+
 difficulty.value = data.nextLevel
+showNextDirections()
 difficulty.addEventListener('change', () => {
   if (!isLevel(difficulty.value)) return
   data.nextLevel = difficulty.value
+  showNextDirections()
   save()
 })
 
@@ -107,7 +117,7 @@ function createPuzzle() {
   } catch (error) {
     const message = error instanceof Error && error.name === 'RangeError'
       ? error.message : 'Nove uganke ni bilo mogoče pripraviti. Poskusi znova.'
-    if (board) board.announce(message)
+    if (board) board.announce(message, 'error')
     else boardPanel.textContent = message
     return false
   }
@@ -116,8 +126,10 @@ function createPuzzle() {
 function mountWordsearch() {
   if (!puzzle || !data.play) return
   board = mountBoard(boardPanel, puzzle, select)
-  const { label, size } = presets[puzzle.level]
-  element('applied-difficulty').textContent = `Trenutno: ${label} · ${size} × ${size}`
+  const { label, directionLabel } = describePreset(puzzle.level, puzzle.revision)
+  const legacy = puzzle.revision === 1 ? ' (R2)' : ''
+  element('applied-difficulty').textContent =
+    `Trenutno: ${label}${legacy} · ${puzzle.size} × ${puzzle.size} · ${directionLabel}`
   updateBoard()
 }
 
@@ -138,7 +150,7 @@ function select(from: number, to: number) {
   const move = selectWord(puzzle, data.play, from, to)
   if (move.status === 'closed') return
   if (move.status === 'invalid') {
-    board.announce('Ta izbira ni iskana beseda. Poskusi znova.')
+    board.showInvalid(from, to)
     return
   }
   if (move.status === 'already-found') {
@@ -160,7 +172,7 @@ function select(from: number, to: number) {
   } else {
     save()
     updateBoard()
-    board.announce(`Najdena beseda: ${move.word}.`)
+    board.announce(`Najdena beseda: ${move.word}.`, 'success')
   }
 }
 
@@ -181,7 +193,7 @@ confirmDialog.addEventListener('close', () => {
 
 newPuzzle.addEventListener('click', () => {
   const replace = () => { if (createPuzzle()) board?.focus() }
-  if (puzzle && data.play && !data.play.revealed && !isComplete(puzzle, data.play.found)) {
+  if (puzzle && data.play && !isComplete(puzzle, data.play.found)) {
     ask('Začneš novo uganko?', 'Trenutna uganka še ni rešena. Z novo uganko izgubiš njen napredek.',
       'Zamenjaj uganko', replace)
   } else replace()
@@ -193,7 +205,7 @@ hint.addEventListener('click', () => {
   data.play = next
   save()
   updateBoard()
-  board.announce(`Označena je začetna črka za besedo ${next.hints.at(-1)}.`)
+  board.announce(`Namig: označena je začetna črka za besedo ${next.hints.at(-1)}.`, 'warning')
   board.focusHint(next.hints.at(-1)!)
 })
 reveal.addEventListener('click', () => {
@@ -220,6 +232,7 @@ function renderRoute(focus: boolean) {
   let heading = element('hero-title')
   if (!games.hidden) {
     heading = element('games-title')
+  } else if (!home.hidden) {
     nickname.value = data.nickname
     profileStatus.textContent = ''
     renderResults(element('results'), data)

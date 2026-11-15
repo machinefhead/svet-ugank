@@ -60,6 +60,7 @@ export function mountBoard(panel: HTMLElement, puzzle: Puzzle, onLine: (from: nu
   let activeCell = 0
   let gesture: { id: number; cell: number } | null = null
   let preview: number[] = []
+  let invalid: number[] = []
   let locked = false
   let viewing = false
   let solutionWord: string | null = null
@@ -76,8 +77,11 @@ export function mountBoard(panel: HTMLElement, puzzle: Puzzle, onLine: (from: nu
     paintSelection([])
   }
 
-  function announce(text: string) {
+  function announce(text: string, tone: 'neutral' | 'success' | 'error' | 'warning' = 'neutral') {
+    for (const cell of invalid) buttons[cell].classList.remove('invalid')
+    invalid = []
     message.textContent = text
+    message.dataset.tone = tone
   }
 
   function focusCell(index: number) {
@@ -109,6 +113,7 @@ export function mountBoard(panel: HTMLElement, puzzle: Puzzle, onLine: (from: nu
   grid.addEventListener('pointerdown', (event) => {
     const cell = cellAt(event.target)
     if (locked || cell === null || !event.isPrimary || event.button !== 0 || gesture) return
+    if (invalid.length) announce('')
     gesture = { id: event.pointerId, cell }
     grid.setPointerCapture(event.pointerId)
     focusCell(cell)
@@ -221,6 +226,12 @@ export function mountBoard(panel: HTMLElement, puzzle: Puzzle, onLine: (from: nu
 
   return {
     paint, announce,
+    showInvalid: (from: number, to: number) => {
+      announce('Ta izbira ni iskana beseda. Poskusi znova.', 'error')
+      const line = lineBetween(puzzle.size, from, to)
+      invalid = line.length ? line : [from, to]
+      for (const cell of invalid) buttons[cell].classList.add('invalid')
+    },
     focus: () => {
       focusCell(activeCell)
       buttons[activeCell].scrollIntoView({ block: 'nearest' })

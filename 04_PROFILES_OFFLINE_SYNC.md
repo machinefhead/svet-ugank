@@ -9,6 +9,8 @@
 - Brez shranjevanja gesel v datotekah, JavaScriptu, LocalStorage ali Githubu.
 - Lokalna statistika ni javna lestvica.
 
+V R2.1 je povzetek profila na naslovnici pod ilustracijo in gumbom »Začni igrati«. Aplikacija prebere stari zapis `svet-ugank:r2` in ob naslednjem shranjevanju zapiše shemo 2. Aktivna uganka R2 še naprej uporablja generator revizije 1, vključno z najdenimi besedami, namigi in stanjem ogleda rešitve. Stara nastavitev »Težka« za naslednjo uganko postane »Srednja«. Časi prejšnje revizije so v zgodovini R2, osebni rekordi R2.1 pa veljajo znotraj iste stopnje in so ločeni glede na uporabo namigov.
+
 ## Offline igranje
 - Ko ima povezavo, igralec prenese aplikacijo in določen paket ugank (PWA).
 - Brez interneta rešuje, shrani napredek in dokončanja v lokalno shrambo.

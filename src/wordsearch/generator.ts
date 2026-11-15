@@ -1,95 +1,200 @@
+import { generateLegacyPuzzle } from './generator-v1.ts'
+import {
+  directions, isLevel, isLevelForRevision, isSeed, presets, puzzleId, revision,
+  type Direction, type GeneratorConfig, type Placement, type Puzzle, type Revision,
+} from './model.ts'
 import { alphabet, words } from './words.ts'
-import { directions, isLevel, isSeed, presets, puzzleId, type Direction, type Level, type Placement, type Puzzle } from './model.ts'
+
+const beamWidth = 5
+const layoutsPerRound = 2
+const searchRounds = 4
+const fillAttempts = 5
+const settingsError = 'Neveljavne nastavitve osmosmerke.'
+const layoutError = 'Uganke s temi nastavitvami ni bilo mogoče sestaviti. Poskusi znova.'
 
 function randomFrom(seed: number) {
-  return (max: number) => {
-    seed = (Math.imul(1664525, seed) + 1013904223) >>> 0
-    return Math.floor(seed / 0x100000000 * max)
+  return () => {
+    seed = (seed + 0x9e3779b9) >>> 0
+    let value = Math.imul(seed ^ (seed >>> 16), 0x21f0aaad)
+    value = Math.imul(value ^ (value >>> 15), 0x735a2d97)
+    return ((value ^ (value >>> 15)) >>> 0) / 0x100000000
   }
 }
 
-function shuffle<T>(items: readonly T[], random: (max: number) => number): T[] {
-  const shuffled = [...items]
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = random(i + 1)
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-  }
-  return shuffled
+type Random = ReturnType<typeof randomFrom>
+
+interface Path {
+  readonly cells: readonly number[]
+  readonly direction: number
+  readonly quadrant: number
 }
 
-function paths(size: number, length: number, steps: readonly Direction[]) {
-  const result: number[][] = []
+function paths(size: number, length: number) {
+  const options: Path[] = []
   for (let row = 0; row < size; row++) {
     for (let col = 0; col < size; col++) {
-      for (const [dr, dc] of steps) {
-        const lastRow = row + (length - 1) * dr
-        const lastCol = col + (length - 1) * dc
-        if (lastRow < 0 || lastRow >= size || lastCol < 0 || lastCol >= size) continue
-        result.push(Array.from({ length }, (_, i) => (row + i * dr) * size + col + i * dc))
+      for (const [direction, [dr, dc]] of directions.entries()) {
+        const endRow = row + (length - 1) * dr
+        const endCol = col + (length - 1) * dc
+        if (endRow < 0 || endRow >= size || endCol < 0 || endCol >= size) continue
+        const cells = Array.from({ length }, (_, i) => (row + i * dr) * size + col + i * dc)
+        const quadrant = 2 * Number(row + endRow >= size - 1) + Number(col + endCol >= size - 1)
+        options.push({ cells, direction, quadrant })
       }
     }
   }
-  return result
+  return options
 }
 
-export function generatePuzzle(level: Level, seed: number): Puzzle {
-  if (!isLevel(level) || !isSeed(seed)) throw new RangeError('Neveljavne nastavitve osmosmerke.')
-  const { size, count, min, max, overlap } = presets[level]
-  const random = randomFrom(seed)
-  const pool = words.filter((word) => word.length >= min && word.length <= max && word !== [...word].reverse().join(''))
-  const lengths = new Map<number, number[][]>()
-  for (let length = min; length <= max; length++) lengths.set(length, paths(size, length, directions))
+const reverse = (word: string) => [...word].reverse().join('')
+const diacritic = /[ČŠŽ]/u
+const diagonal = (index: number) => directions[index].every((step) => step !== 0)
+const directionIndex = ([row, col]: Direction) => directions.findIndex(([dr, dc]) => row === dr && col === dc)
 
-  for (let attempt = 0; attempt < 80; attempt++) {
-    const chosen: string[] = []
-    // Include a word with a Slovenian diacritic, then avoid contained words and their reverses.
-    const candidates = shuffle(pool, random)
-    const first = candidates.find((word) => /[ČŠŽ]/u.test(word))
-    if (!first) break
-    chosen.push(first)
-    for (const word of candidates) {
-      const reverse = [...word].reverse().join('')
-      if (chosen.some((other) => other.includes(word) || word.includes(other) ||
-        other.includes(reverse) || reverse.includes(other))) continue
+function chooseWords(pool: readonly string[], count: number, random: Random) {
+  const ordered = [...pool]
+  for (let i = ordered.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1))
+    ;[ordered[i], ordered[j]] = [ordered[j], ordered[i]]
+  }
+  const first = ordered.find((word) => diacritic.test(word))
+  if (!first) return []
+  const chosen: string[] = [first]
+  for (const word of ordered) {
+    if (chosen.length === count) break
+    const backwards = reverse(word)
+    if (!chosen.some((other) => [word, backwards].some((form) => form.includes(other) || other.includes(form)))) {
       chosen.push(word)
-      if (chosen.length === count) break
     }
-    if (chosen.length !== count) continue
-    chosen.sort((a, b) => b.length - a.length)
+  }
+  return chosen.sort((a, b) => b.length - a.length)
+}
 
-    const letters = Array<string>(size ** 2).fill('')
-    const placements: Placement[] = []
-    const steps = shuffle(directions, random)
-    for (const [i, word] of chosen.entries()) {
-      const options = i < steps.length ? paths(size, word.length, [steps[i]]) : lengths.get(word.length)!
-      let best = -Infinity
-      let matches: number[][] = []
-      for (const cells of options) {
-        if (!cells.every((cell, j) => !letters[cell] || letters[cell] === word[j])) continue
-        const score = overlap * cells.filter((cell) => letters[cell]).length
-        if (score > best) {
-          best = score
-          matches = [cells]
-        } else if (score === best) matches.push(cells)
+interface Layout {
+  readonly letters: readonly string[]
+  readonly placements: readonly Placement[]
+  readonly uses: readonly number[]
+  readonly quadrants: readonly number[]
+  readonly distinct: number
+  readonly diagonals: number
+  readonly backwards: number
+  readonly overlap: number
+  readonly score: number
+}
+
+function crossings(letters: readonly string[], word: string, cells: readonly number[]) {
+  let overlap = 0
+  for (const [i, cell] of cells.entries()) {
+    if (!letters[cell]) continue
+    if (letters[cell] !== word[i]) return -1
+    overlap++
+  }
+  return overlap
+}
+
+function placeWords(chosen: readonly string[], options: ReadonlyMap<number, Path[]>, config: GeneratorConfig, random: Random) {
+  let beam: Layout[] = [{
+    letters: Array<string>(config.size ** 2).fill(''), placements: [], uses: Array<number>(8).fill(0),
+    quadrants: [0, 0, 0, 0], distinct: 0, diagonals: 0, backwards: 0, overlap: 0, score: 0,
+  }]
+
+  // Linear space per depth: keep alternatives alive when the best partial layout later gets stuck.
+  for (const [depth, word] of chosen.entries()) {
+    const remaining = chosen.length - depth - 1
+    const target = config.overlap.target * (depth + 1) / chosen.length
+    const next: Layout[] = []
+    for (const parent of beam) {
+      const spread = parent.quadrants.reduce((sum, count) => sum + count ** 2, 0)
+      const repeated = parent.uses.reduce((sum, count) => sum + Math.max(0, count - 2) ** 2, 0)
+      for (const { cells, direction, quadrant } of options.get(word.length)!) {
+        const shared = crossings(parent.letters, word, cells)
+        const overlap = parent.overlap + shared
+        if (shared < 0 || overlap > config.overlap.max || (!remaining && overlap < config.overlap.min)) continue
+        const distinct = parent.distinct + Number(parent.uses[direction] === 0)
+        const diagonals = parent.diagonals + Number(diagonal(direction))
+        const backwards = parent.backwards + Number(direction >= 4)
+        if (distinct + remaining < config.minDirections || diagonals + remaining < config.minDiagonals ||
+            backwards + remaining < config.minReverse) continue
+
+        const concentration = spread + 2 * parent.quadrants[quadrant] + 1
+        const repetition = repeated + Math.max(0, 2 * parent.uses[direction] - 3)
+        const score = -2 * Math.abs(overlap - target) - 0.35 * concentration - 0.65 * repetition + 2 * random()
+        if (next.length === beamWidth && score <= next[beamWidth - 1].score) continue
+
+        const letters = [...parent.letters]
+        cells.forEach((cell, i) => { letters[cell] = word[i] })
+        const uses = [...parent.uses]
+        uses[direction]++
+        const quadrants = [...parent.quadrants]
+        quadrants[quadrant]++
+        next.push({
+          letters, placements: [...parent.placements, { word, cells }], uses, quadrants,
+          distinct, diagonals, backwards, overlap, score,
+        })
+        next.sort((a, b) => b.score - a.score)
+        if (next.length > beamWidth) next.pop()
       }
-      if (!matches.length) break
-      const cells = matches[random(matches.length)]
-      cells.forEach((cell, j) => { letters[cell] = word[j] })
-      placements.push({ word, cells })
     }
-    if (placements.length !== count) continue
+    beam = next
+    if (!beam.length) break
+  }
+  return beam
+}
 
-    for (let fill = 0; fill < 12; fill++) {
-      const grid = letters.map((letter) => letter || alphabet[random(alphabet.length)])
-      // Accidental copies would look valid to players. Only publish boards with one path per target.
-      if (placements.every(({ word }) => lengths.get(word.length)!
-        .filter((cells) => cells.every((cell, i) => grid[cell] === word[i])).length === 1)) {
-        return {
-          id: puzzleId(level, seed), level, size, letters: grid,
-          placements: placements.sort((a, b) => a.word.localeCompare(b.word, 'sl')),
+type Grid = Pick<Puzzle, 'size' | 'letters' | 'placements'>
+
+// The validated limits also bound work for future callers using custom combinations.
+export function generateGrid(config: GeneratorConfig, seed: number): Grid {
+  const { size, wordCount, minLength, maxLength, overlap, filler, minDirections, minDiagonals, minReverse } = config
+  if (!isSeed(seed) || ![size, wordCount, minLength, maxLength, overlap.min, overlap.target, overlap.max,
+    minDirections, minDiagonals, minReverse].every(Number.isInteger) ||
+    size < 3 || size > 16 || wordCount < 1 || wordCount > 16 || minLength < 3 || maxLength < minLength ||
+    maxLength > size || overlap.min < 0 || overlap.min > overlap.target || overlap.target > overlap.max ||
+    overlap.max >= wordCount * maxLength || minDirections < 1 || minDiagonals < 0 || minReverse < 0 ||
+    (filler !== 'uniform' && filler !== 'dictionary')) throw new RangeError(settingsError)
+
+  const allowed = new Set(config.allowedDirections.map(directionIndex))
+  if (!allowed.size || allowed.has(-1) || allowed.size !== config.allowedDirections.length) throw new RangeError(settingsError)
+  const directionList = [...allowed]
+  if (minDirections > Math.min(allowed.size, wordCount) || minDiagonals > wordCount || minReverse > wordCount ||
+    (minDiagonals && !directionList.some(diagonal)) || (minReverse && !directionList.some((index) => index >= 4)) ||
+    minLength * wordCount - overlap.max > size ** 2) throw new RangeError(layoutError)
+
+  const pool = words.filter((word) => word.length >= minLength && word.length <= maxLength && word !== reverse(word))
+  if (pool.length < wordCount || !pool.some((word) => diacritic.test(word))) throw new RangeError(layoutError)
+  const allPaths = new Map<number, Path[]>()
+  const options = new Map<number, Path[]>()
+  for (let length = minLength; length <= maxLength; length++) {
+    const entries = paths(size, length)
+    allPaths.set(length, entries)
+    options.set(length, entries.filter(({ direction }) => allowed.has(direction)))
+  }
+  const random = randomFrom(seed)
+  const fillerLetters = filler === 'uniform' ? alphabet : words.join('')
+  for (let round = 0; round < searchRounds; round++) {
+    const candidates: Layout[] = []
+    for (let attempt = 0; attempt < layoutsPerRound; attempt++) {
+      const chosen = chooseWords(pool, wordCount, random)
+      if (chosen.length === wordCount) candidates.push(...placeWords(chosen, options, config, random))
+    }
+    for (const { letters, placements } of candidates.sort((a, b) => b.score - a.score)) {
+      for (let fill = 0; fill < fillAttempts; fill++) {
+        const filled = letters.map((letter) => letter || fillerLetters[Math.floor(random() * fillerLetters.length)])
+        // Include reverse reading and directions unavailable for intentional placement.
+        if (placements.every(({ word, cells }) => allPaths.get(word.length)!.every((path) =>
+          path.cells[0] === cells[0] && path.cells.at(-1) === cells.at(-1) ||
+          !path.cells.every((cell, i) => filled[cell] === word[i]),
+        ))) {
+          return { size, letters: filled, placements }
         }
       }
     }
   }
-  throw new RangeError('Uganke s temi nastavitvami ni bilo mogoče sestaviti.')
+  throw new RangeError(layoutError)
+}
+
+export function generatePuzzle(level: unknown, seed: number, rev: Revision = revision): Puzzle {
+  if (rev === 1 && isLevelForRevision(level, 1)) return generateLegacyPuzzle(level, seed)
+  if (rev !== revision || !isLevel(level)) throw new RangeError(settingsError)
+  return { id: puzzleId(level, seed), revision, level, ...generateGrid(presets[level], seed) }
 }

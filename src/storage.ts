@@ -1,5 +1,5 @@
 import { generatePuzzle } from './wordsearch/generator.ts'
-import { hintLimit, isLevel, isSeed, puzzleId, revision, type Level, type PlayState, type Puzzle } from './wordsearch/model.ts'
+import { hintLimit, isLevel, isLevelForRevision, isSeed, puzzleId, revision, type Level, type PlayState, type Puzzle } from './wordsearch/model.ts'
 import type { Result } from './wordsearch/session.ts'
 
 export const storageKey = 'svet-ugank:r2'
@@ -7,7 +7,7 @@ export const nicknameLimit = 24
 export type Theme = 'system' | 'light' | 'dark'
 
 export interface LocalData {
-  version: 1
+  version: 2
   theme: Theme
   nickname: string
   nextLevel: Level
@@ -18,7 +18,7 @@ export interface LocalData {
 type LocalStorage = Pick<Storage, 'getItem' | 'setItem'>
 
 const defaults = (): LocalData => ({
-  version: 1, theme: 'system', nickname: '', nextLevel: 'easy', play: null, results: [],
+  version: 2, theme: 'system', nickname: '', nextLevel: 'beginner', play: null, results: [],
 })
 
 export function isTheme(value: unknown): value is Theme {
@@ -48,15 +48,16 @@ function uniqueWords(value: unknown, allowed: Set<string>, max = allowed.size): 
 function readPlay(value: unknown): { play: PlayState | null; puzzle: Puzzle | null } {
   const empty = { play: null, puzzle: null }
   const entry = object(value)
-  if (!entry || entry.revision !== revision || !isLevel(entry.level) || !isSeed(entry.seed) ||
+  if (!entry || (entry.revision !== 1 && entry.revision !== revision) ||
+    !isLevelForRevision(entry.level, entry.revision) || !isSeed(entry.seed) ||
     !timestamp(entry.startedAt) || typeof entry.revealed !== 'boolean') return empty
   try {
-    const puzzle = generatePuzzle(entry.level, entry.seed)
+    const puzzle = generatePuzzle(entry.level, entry.seed, entry.revision)
     const allowed = new Set(puzzle.placements.map(({ word }) => word))
     const found = uniqueWords(entry.found, allowed)
     const hints = uniqueWords(entry.hints, allowed, hintLimit)
     if (!found || !hints) return empty
-    return { puzzle, play: { level: entry.level, seed: entry.seed, startedAt: entry.startedAt,
+    return { puzzle, play: { revision: entry.revision, level: entry.level, seed: entry.seed, startedAt: entry.startedAt,
       found, hints, revealed: entry.revealed } }
   } catch {
     return empty
@@ -69,14 +70,17 @@ function readResults(value: unknown): Result[] {
   const results: Result[] = []
   for (const valueEntry of value) {
     const entry = object(valueEntry)
-    if (!entry || typeof entry.puzzleId !== 'string' || !isLevel(entry.level) ||
+    if (!entry || typeof entry.puzzleId !== 'string' ||
       !timestamp(entry.finishedAt) || !timestamp(entry.elapsedMs) || entry.elapsedMs > entry.finishedAt ||
       typeof entry.hints !== 'number' || !Number.isInteger(entry.hints) || entry.hints < 0 ||
       entry.hints > hintLimit || ids.has(entry.puzzleId)) continue
-    const seed = Number(entry.puzzleId.split('-').at(-1))
-    if (!isSeed(seed) || entry.puzzleId !== puzzleId(entry.level, seed)) continue
+    const [, revTag, , seedTag] = entry.puzzleId.split('-')
+    const rev = revTag === 'r1' ? 1 : revTag === 'r2' ? revision : null
+    const seed = Number(seedTag)
+    if (rev === null || !isLevelForRevision(entry.level, rev) || !isSeed(seed) ||
+      entry.puzzleId !== puzzleId(entry.level, seed, rev)) continue
     ids.add(entry.puzzleId)
-    results.push({ puzzleId: entry.puzzleId, level: entry.level, finishedAt: entry.finishedAt,
+    results.push({ puzzleId: entry.puzzleId, revision: rev, level: entry.level, finishedAt: entry.finishedAt,
       elapsedMs: entry.elapsedMs, hints: entry.hints })
   }
   return results
@@ -93,18 +97,19 @@ export function openLocalData(getStorage: () => LocalStorage) {
     if (raw !== null) {
       try {
         const entry = object(JSON.parse(raw))
-        if (entry?.version === 1) {
+        if (entry?.version === 1 || entry?.version === 2) {
           const active = readPlay(entry.play)
           puzzle = active.puzzle
           data = {
-            version: 1,
+            version: 2,
             theme: isTheme(entry.theme) ? entry.theme : 'system',
             nickname: typeof entry.nickname === 'string' ? normalizeNickname(entry.nickname) : '',
-            nextLevel: isLevel(entry.nextLevel) ? entry.nextLevel : 'easy',
+            nextLevel: entry.version === 1 && entry.nextLevel === 'hard' ? 'medium'
+              : isLevel(entry.nextLevel) ? entry.nextLevel : 'beginner',
             play: active.play,
             results: readResults(entry.results),
           }
-        } else if (entry && typeof entry.version === 'number' && entry.version > 1) {
+        } else if (entry && typeof entry.version === 'number' && entry.version > 2) {
           supported = false
         }
       } catch {
@@ -123,9 +128,7 @@ export function openLocalData(getStorage: () => LocalStorage) {
   const save = () => {
     if (!supported) return false
     try {
-      getStorage().setItem(storageKey, JSON.stringify({
-        ...data, play: data.play && { ...data.play, revision },
-      }))
+      getStorage().setItem(storageKey, JSON.stringify(data))
       available = true
     } catch {
       available = false

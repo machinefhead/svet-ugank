@@ -1,32 +1,57 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { findWord, isComplete, lineBetween } from '../src/wordsearch/checker.ts'
-import { generatePuzzle } from '../src/wordsearch/generator.ts'
+import { generateGrid, generatePuzzle } from '../src/wordsearch/generator.ts'
+import { alphabet, words } from '../src/wordsearch/words.ts'
 import { directions, presets } from '../src/wordsearch/model.ts'
 import { recordResult, selectWord, startPuzzle, useHint } from '../src/wordsearch/session.ts'
 
-test('presets produce repeatable, distinct boards with eight directions, šumniki, and unique answers', () => {
+test('101 seeds per level respect the preset, return unique answers, and vary layouts', (t) => {
   for (const [level, preset] of Object.entries(presets)) {
-    const first = generatePuzzle(level, 123)
-    assert.deepEqual(first, generatePuzzle(level, 123))
-    assert.notDeepEqual(first.letters, generatePuzzle(level, 124).letters)
-    for (const seed of [...Array.from({ length: 24 }, (_, i) => i), 0xffffffff]) {
+    const seeds = [...Array.from({ length: 100 }, (_, i) => i), 0xffffffff]
+    const layoutSignatures = new Set()
+    const counts = Array(directions.length).fill(0)
+    let overlapTotal = 0, densityTotal = 0, maxMs = 0, allDirections = 0
+    const started = performance.now()
+    for (const seed of seeds) {
+      const before = performance.now()
       const puzzle = generatePuzzle(level, seed)
+      maxMs = Math.max(maxMs, performance.now() - before)
+      if (seed === 0 || seed === 51 || seed === 0xffffffff) assert.deepEqual(generatePuzzle(level, seed), puzzle)
       assert.equal(puzzle.size, preset.size)
       assert.equal(puzzle.letters.length, preset.size ** 2)
-      assert.equal(puzzle.placements.length, preset.count)
+      assert.ok(puzzle.letters.every((letter) => letter.length === 1 && alphabet.includes(letter)))
+      assert.equal(puzzle.placements.length, preset.wordCount)
       assert.ok(puzzle.placements.some(({ word }) => /[ČŠŽ]/u.test(word)))
-      const steps = new Set()
-      for (const { word, cells } of puzzle.placements) {
-        assert.ok(word.length >= preset.min && word.length <= preset.max)
+      const used = new Set()
+      const occupied = new Set()
+      let totalLetters = 0, diagonals = 0, backwards = 0
+      const row = (cell) => Math.floor(cell / puzzle.size)
+      const col = (cell) => cell % puzzle.size
+      for (const [index, { word, cells }] of puzzle.placements.entries()) {
+        assert.ok(words.includes(word))
+        assert.ok(word.length >= preset.minLength && word.length <= preset.maxLength)
+        for (const { word: other } of puzzle.placements.slice(index + 1)) {
+          for (const form of [other, [...other].reverse().join('')]) {
+            assert.ok(!word.includes(form) && !form.includes(word))
+          }
+        }
         assert.equal(cells.map((cell) => puzzle.letters[cell]).join(''), word)
         const start = cells[0]
         const end = cells.at(-1)
+        assert.deepEqual(cells, lineBetween(puzzle.size, start, end))
         assert.equal(findWord(puzzle, start, end), word)
         assert.equal(findWord(puzzle, end, start), word)
-        const row = (cell) => Math.floor(cell / puzzle.size)
-        const col = (cell) => cell % puzzle.size
-        steps.add([row(cells[1]) - row(start), col(cells[1]) - col(start)].join(','))
+        const step = [row(cells[1]) - row(start), col(cells[1]) - col(start)]
+        assert.ok(preset.allowedDirections.some((direction) => String(direction) === String(step)))
+        const direction = directions.findIndex((direction) => String(direction) === String(step))
+        counts[direction]++
+        used.add(direction)
+        diagonals += Number(step.every(Boolean))
+        backwards += Number(direction >= 4)
+        totalLetters += cells.length
+        cells.forEach((cell) => occupied.add(cell))
+
         let copies = 0
         for (let r = 0; r < puzzle.size; r++) {
           for (let c = 0; c < puzzle.size; c++) {
@@ -39,11 +64,44 @@ test('presets produce repeatable, distinct boards with eight directions, šumnik
             }
           }
         }
-        assert.equal(copies, 1, `${puzzle.id}: ${word}`)
+        assert.equal(copies, 1, puzzle.id + ': ' + word)
       }
-      assert.deepEqual(steps, new Set(directions.map(String)))
+      const overlap = totalLetters - occupied.size
+      assert.ok(overlap >= preset.overlap.min && overlap <= preset.overlap.max)
+      assert.ok(used.size >= preset.minDirections && diagonals >= preset.minDiagonals && backwards >= preset.minReverse)
+      allDirections += Number(used.size === directions.length)
+      overlapTotal += overlap
+      densityTotal += occupied.size / puzzle.letters.length
+      layoutSignatures.add(puzzle.placements.map(({ cells }) => cells.join(',')).sort().join('|'))
     }
+    assert.ok(layoutSignatures.size >= 95)
+    assert.equal(counts.filter(Boolean).length, preset.allowedDirections.length)
+    assert.ok(allDirections < seeds.length)
+    const totalWords = seeds.length * preset.wordCount
+    assert.ok(counts.filter(Boolean).every((count) => count / totalWords >= 0.05))
+    t.diagnostic(JSON.stringify({
+      level, samples: seeds.length, layouts: layoutSignatures.size, counts, allDirections,
+      diagonalPct: Math.round((counts[2] + counts[3] + counts[6] + counts[7]) / totalWords * 100),
+      reversePct: Math.round(counts.slice(4).reduce((a, b) => a + b) / totalWords * 100),
+      overlap: (overlapTotal / seeds.length).toFixed(2), densityPct: (100 * densityTotal / seeds.length).toFixed(1),
+      maxMs: maxMs.toFixed(1), sampleMs: (performance.now() - started).toFixed(0),
+    }))
   }
+})
+
+test('custom configuration accepts independent axes and rejects invalid or impossible layouts', () => {
+  const config = {
+    ...presets.beginner, size: 5, wordCount: 1, allowedDirections: [[0, -1]],
+    overlap: { min: 0, target: 0, max: 0 }, filler: 'dictionary', minDirections: 1, minReverse: 1,
+  }
+  const grid = generateGrid(config, 6)
+  const { cells } = grid.placements[0]
+  assert.equal(cells[1], cells[0] - 1)
+  assert.throws(() => generateGrid({ ...config, size: 200 }, 0), /Neveljavne nastavitve/)
+  assert.throws(() => generateGrid({ ...config, minDiagonals: 1 }, 0), /ni bilo mogoče sestaviti/)
+  // Area is sufficient, but two length-four words cannot cross using only one direction.
+  assert.throws(() => generateGrid({ ...config, minLength: 4, wordCount: 2,
+    overlap: { min: 1, target: 1, max: 1 } }, 0), /ni bilo mogoče sestaviti/)
 })
 
 test('invalid settings and selections are rejected, including row wrap', () => {
@@ -79,7 +137,7 @@ test('every word must be found; repeated selections or completion cannot award t
     assert.equal(repeat.play, play)
   }
   const results = recordResult([], puzzle, play, 650)
-  assert.deepEqual(results, [{ puzzleId: puzzle.id, level: 'medium', elapsedMs: 550, hints: 2, finishedAt: 650 }])
+  assert.deepEqual(results, [{ puzzleId: puzzle.id, revision: 2, level: 'medium', elapsedMs: 550, hints: 2, finishedAt: 650 }])
   assert.equal(recordResult(results, puzzle, play, 777), results)
   assert.deepEqual(recordResult([], puzzle, { ...play, revealed: true }, 650), [])
   assert.equal(selectWord(puzzle, { ...play, revealed: true, found: [] }, 0, 9).status, 'closed')

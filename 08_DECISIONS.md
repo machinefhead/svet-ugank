@@ -34,3 +34,10 @@ Novih odločitev ni dovoljeno prikrito izvajati kot že potrjenih.
 - Lokalna shramba `localStorage` ima verzioniran zapis za temo, izbirni vzdevek, naslednjo prednastavitev, aktivno osmosmerko in osebne rezultate. Če zapis ni mogoč, je igranje še vedno na voljo v pomnilniku zavihka.
 - Osmosmerka se obnovi iz semena, prednastavitve in revizije generatorja. Tri prednastavitve spreminjajo velikost, število in dolžino besed ter izbiro prekrivanj. Vse uporabljajo osem smeri. Tema besed in ročna izbira smeri nista del R2.
 - Dva namiga označita začetni črki. Po potrjenem ogledu celotne rešitve ostane uganka za pregled, najdene besede se ohranijo, rezultat pa se ne zabeleži. Osebni časi z namigi in brez njih so ločeni. Lokalni čas od začetka vključuje premore.
+
+## Izvedba R2.1 — 15. 11. 2026
+
+- Revizija 1 je prvih osem gesel prisilila v osem posameznih smeri. Revizija 2 na vsakem koraku ohrani do pet najbolje ocenjenih delnih postavitev. Ocena upošteva prekrivanja, porazdelitev po kvadrantih in pogostost smeri. Generator primerja dve iskanji z različnima naboroma besed ter lahko ponovi krog do štirikrat. Pred prikazom preveri enoličnost vsake besede v vseh osmih smereh. Če noben kandidat ne uspe, trenutna uganka ostane nespremenjena.
+- ID novih ugank vsebuje `r2`. Generator, prednastavitve, vrstni red smeri in besedni nabor za `r1` so del zapisa prvotnih ugank. Sprememba podatkov ali pravil, ki spremeni postavitev iz istega semena, zahteva novo revizijo.
+- Aktivne stopnje so Začetna, Lahka in Srednja. Prva uporablja desno in dol, druga doda diagonali navzdol, tretja doda tudi obratne smeri. Pragovi in ciljna križanja so v [zahtevah za igre](02_GAME_REQUIREMENTS.md). Zahtevnost še čaka na igralni preizkus.
+- Profil je pod naslovnico. Zelen uspeh, rdeča napaka in oranžen namig imajo tudi besedni status; seznam najdenih besed vključuje kljukico.

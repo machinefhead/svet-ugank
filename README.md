@@ -2,13 +2,13 @@
 
 Slovenska spletna igralnica za otroke in odrasle. Začetni razvoj: **Osmosmerka, Križanka, Sudoku, Labirint**.
 
-**Status R2:** Osmosmerko je mogoče igrati. Skandinavska križanka, Sudoku in Labirint so vzorčni prikazi DEMO. Vzdevek, tema, aktivna uganka in osebni rezultati so shranjeni v brskalniku na tej napravi. R2 ne vključuje javne objave, računov ali skupnih lestvic.
+**Status R2.1:** Osmosmerka ima stopnje Začetna, Lahka in Srednja. Skandinavska križanka, Sudoku in Labirint so vzorčni prikazi DEMO. Vzdevek, tema, aktivna uganka in osebni rezultati so shranjeni v brskalniku na tej napravi. Aktivno uganko R2 lahko nadaljuješ, prejšnji časi pa so v zgodovini R2 na naslovnici.
 
 ## Lokalni zagon
 
 Z Node.js 24 v projektni mapi zaženi `npm ci` in `npm run dev`, nato odpri lokalni naslov, ki ga izpiše Vite. Za preverjanje uporabi `npm test` in `npm run build`.
 
-Hiter pregled v brskalniku: izberi »Začni igrati«, nastavi vzdevek in odpri Osmosmerko. Najdi besedo, spremeni težavnost brez klika na »Nova uganka« in osveži stran: ista mreža in najdena beseda morata ostati prikazani. Po dokončanju preveri en zapis v »Mojih rezultatih«. Na telefonu preizkusi vlečenje ali dva dotika končnih črk.
+Za hiter pregled na naslovnici po želji nastavi vzdevek, nato prek »Začni igrati« odpri Osmosmerko. Najdi besedo, spremeni težavnost in osveži stran. Ista mreža in zelena najdena beseda morata ostati prikazani. Novo stopnjo uveljavi z »Nova uganka« in potrditvijo zamenjave. Po dokončanju se vrni na naslovnico in preveri en zapis v »Mojih rezultatih«. Na telefonu preizkusi vlečenje ali dva dotika končnih črk.
 
 ## Začni tukaj
 1. [00_START_HERE.md](00_START_HERE.md) — aktualno stanje in omejitve

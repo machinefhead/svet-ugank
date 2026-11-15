@@ -26,33 +26,30 @@
 
     <main class="wrap">
       <div id="catalog">
-        <section class="hero" id="domov" aria-labelledby="hero-title">
-          <div class="hero-copy">
-            <h1 id="hero-title" tabindex="-1">Svet<br> ugank<span aria-hidden="true">.</span></h1>
-            <p>Štiri igre za nekaj minut miru, radovednosti in razgibavanja možganov.</p>
-            <a class="button primary" href="#igre">Začni igrati <span aria-hidden="true">→</span></a>
-          </div>
-          <div class="hero-art" aria-hidden="true">
-            <span class="spark spark-top">✧</span>
-            <span class="spark spark-bottom">✦</span>
-            <div class="art-letter">
-              <span>U</span><span>G</span><span>A</span>
-              <span>M</span><span>I</span><span>N</span>
-              <span>S</span><span>L</span><span>K</span>
+        <div id="domov">
+          <section class="hero" aria-labelledby="hero-title">
+            <div class="hero-copy">
+              <h1 id="hero-title" tabindex="-1">Svet<br> ugank<span aria-hidden="true">.</span></h1>
+              <p>Štiri igre za nekaj minut miru, radovednosti in razgibavanja možganov.</p>
+              <a class="button primary" href="#igre">Začni igrati <span aria-hidden="true">→</span></a>
             </div>
-            <div class="art-number">
-              <span>5</span><span></span><span>3</span>
-              <span></span><span>7</span><span></span>
-              <span>2</span><span></span><span>9</span>
+            <div class="hero-art" aria-hidden="true">
+              <span class="spark spark-top">✧</span>
+              <span class="spark spark-bottom">✦</span>
+              <div class="art-letter">
+                <span>U</span><span>G</span><span>A</span>
+                <span>M</span><span>I</span><span>N</span>
+                <span>S</span><span>L</span><span>K</span>
+              </div>
+              <div class="art-number">
+                <span>5</span><span></span><span>3</span>
+                <span></span><span>7</span><span></span>
+                <span>2</span><span></span><span>9</span>
+              </div>
+              <div class="art-maze"><i></i><i></i><i></i><i></i><i></i></div>
             </div>
-            <div class="art-maze"><i></i><i></i><i></i><i></i><i></i></div>
-          </div>
-        </section>
+          </section>
 
-        <section class="games" id="igre" aria-labelledby="games-title" hidden>
-          <a class="back-link" href="#domov"><span aria-hidden="true">←</span> Domov</a>
-          <h1 id="games-title" tabindex="-1">Izberi igro</h1>
-          <div class="game-list" id="game-list"></div>
           <section class="profile-panel" aria-labelledby="profile-title">
             <h2 id="profile-title">Moji rezultati</h2>
             <p id="storage-description">Napredek in rezultati so na tej napravi. Brisanje podatkov brskalnika jih odstrani.</p>
@@ -66,6 +63,12 @@
             <p id="profile-status" role="status"></p>
             <div id="results"></div>
           </section>
+        </div>
+
+        <section class="games" id="igre" aria-labelledby="games-title" hidden>
+          <a class="back-link" href="#domov"><span aria-hidden="true">←</span> Domov</a>
+          <h1 id="games-title" tabindex="-1">Izberi igro</h1>
+          <div class="game-list" id="game-list"></div>
         </section>
       </div>
 
@@ -84,11 +87,9 @@
           <aside class="play-options" id="play-options" aria-labelledby="options-title">
             <h2 id="options-title">Naslednja uganka</h2>
             <label for="difficulty">Težavnost in velikost</label>
-            <select id="difficulty">
-              <option value="easy">Lahka · 8 × 8</option>
-              <option value="medium">Srednja · 10 × 10</option>
-              <option value="hard">Težka · 12 × 12</option>
+            <select id="difficulty" aria-describedby="next-directions">
             </select>
+            <p class="applied-difficulty" id="next-directions"></p>
             <button class="button primary" id="new-puzzle" type="button">Nova uganka</button>
             <p class="applied-difficulty" id="applied-difficulty"></p>
             <button class="button secondary" id="hint" type="button" disabled>Namig</button>
