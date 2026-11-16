@@ -81,7 +81,9 @@ function readResults(value: unknown): Result[] {
       !timestamp(entry.finishedAt) || !timestamp(entry.elapsedMs) || entry.elapsedMs > entry.finishedAt ||
       typeof entry.hints !== 'number' || !Number.isInteger(entry.hints) || entry.hints < 0 ||
       entry.hints > hintLimit || ids.has(entry.puzzleId)) continue
-    const [, revTag, , seedTag] = entry.puzzleId.split('-')
+    const parts = entry.puzzleId.split('-')
+    const revTag = parts[1]
+    const seedTag = parts.at(-1)
     const rev = revTag === 'r1' ? 1 : revTag === 'r2' ? revision : null
     const seed = Number(seedTag)
     if (entry.options !== undefined && (rev !== revision || !isWordsearchOptions(entry.options))) continue
