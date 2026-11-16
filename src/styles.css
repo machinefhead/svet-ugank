@@ -571,3 +571,31 @@ button:disabled { cursor: default; opacity: .62; }
   .maze-thumbstick { width: 128px; height: 128px; flex-basis: 128px; }
   .maze-input-row .maze-controls { flex-basis: 100%; }
 }
+
+/* Position indicators are screen-sized so a 61×61 maze is still readable. */
+.maze-player-marker, .maze-goal-marker {
+  position: absolute;
+  z-index: 3;
+  width: 17px;
+  height: 17px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.maze-player-marker {
+  border: 2px solid var(--paper);
+  background: #8b40d8;
+  box-shadow: 0 0 0 2px #191222, 0 0 0 5px #8b40d855;
+}
+.maze-goal-marker {
+  display: grid;
+  place-items: center;
+  background: #d0f0b3;
+  color: #173d28;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 0 0 2px #173d28;
+}
+@media (min-width: 641px) {
+  .maze-player-marker, .maze-goal-marker { width: 20px; height: 20px; }
+}
