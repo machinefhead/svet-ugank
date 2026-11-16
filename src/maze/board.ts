@@ -17,7 +17,7 @@ export function mountMazeBoard(
       <div class="maze-grid" aria-hidden="true"></div>
     </div>
     <div class="board-feedback maze-feedback">
-      <p id="maze-instructions">Celotna mreža je vidna. Na telefonu povleci v želeno smer kjerkoli po mreži ali uporabi smerne gumbe. Povečava omogoči natančen ogled.</p>
+      <p id="maze-instructions">Celotna mreža je vidna. Na telefonu premikaj igralca z okroglo krmilno palico ali s smernimi gumbi. Po mreži lahko drsiš kot po običajni strani. Povečava omogoči podrobnejši ogled.</p>
       <p>● Ti · S Začetek · ★ Cilj · sled prehojene poti · <strong>rumena pot = ogled rešitve</strong></p>
       <p class="maze-progress" aria-live="polite"></p>
       <p class="board-message" role="status"></p>
@@ -275,7 +275,7 @@ export function mountMazeBoard(
     pan.setAttribute('aria-pressed', String(panning))
     instructions.textContent = panning
       ? 'Povleci za premik pogleda. Smerni gumbi še vedno premikajo igralca.'
-      : 'Na telefonu lahko premikaš igralca s potegi v želeno smer. Za celoten pregled izklopi povečavo.'
+      : 'Premikaj se s krmilno palico ali s smernimi gumbi. Za celoten pregled izklopi povečavo.'
   })
   panel.querySelector('.maze-restart')!.addEventListener('click', restart)
 
