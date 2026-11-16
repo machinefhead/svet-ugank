@@ -463,3 +463,11 @@ button:disabled { cursor: default; opacity: .62; }
   .toolbar-fields label { min-width: min(100%, 8rem); flex: 1; }
   .toolbar-fields label select { width: 100%; }
 }
+
+.maze-solution-banner {
+  max-width: 740px;
+  margin: 0 auto 12px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--ink);
+}
