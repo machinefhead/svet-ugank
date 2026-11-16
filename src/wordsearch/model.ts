@@ -49,6 +49,26 @@ export const presets = {
 
 export type Level = keyof typeof presets
 export type PuzzleLevel = Level | LegacyLevel
+
+// Optional custom configuration for new R2-format puzzles. Missing options
+// must retain the exact historical generation algorithm and ID.
+export const customSizes = [6, 8, 10, 12] as const
+export const customDirections = [2, 4, 8] as const
+export const customQuantities = ['few', 'normal', 'many'] as const
+export interface WordsearchOptions {
+  readonly size: typeof customSizes[number]
+  readonly directions: typeof customDirections[number]
+  readonly quantity: typeof customQuantities[number]
+}
+export const defaultWordsearchOptions: WordsearchOptions = { size: 6, directions: 2, quantity: 'normal' }
+
+export function isWordsearchOptions(value: unknown): value is WordsearchOptions {
+  if (!value || typeof value !== 'object') return false
+  const entry = value as Record<string, unknown>
+  return customSizes.some((size) => size === entry.size) &&
+    customDirections.some((directions) => directions === entry.directions) &&
+    customQuantities.some((quantity) => quantity === entry.quantity)
+}
 export const hintLimit = 2
 
 export interface Placement {
@@ -63,6 +83,7 @@ export interface Puzzle {
   readonly size: number
   readonly letters: readonly string[]
   readonly placements: readonly Placement[]
+  readonly options?: WordsearchOptions
 }
 
 export interface PlayState {
@@ -73,6 +94,7 @@ export interface PlayState {
   readonly found: readonly string[]
   readonly hints: readonly string[]
   readonly revealed: boolean
+  readonly options?: WordsearchOptions
 }
 
 export function isLevel(value: unknown): value is Level {
@@ -99,6 +121,10 @@ export function isSeed(value: unknown): value is number {
   return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 && value <= 0xffffffff
 }
 
-export function puzzleId(level: PuzzleLevel, seed: number, rev: Revision = revision) {
+export function puzzleId(level: PuzzleLevel, seed: number, rev: Revision = revision,
+  options?: WordsearchOptions) {
+  if (options && rev === revision) {
+    return `osmosmerka-r${rev}-${level}-s${options.size}-d${options.directions}-q${options.quantity}-${seed}`
+  }
   return `osmosmerka-r${rev}-${level}-${seed}`
 }
