@@ -12,3 +12,5 @@
 - **Kasneje:** pravi spletni računi, sinhronizacija in skupne lestvice; PDF/tisk, nove vrste, trgovina.
 
 Brez zavezujočih rokov. En Codeх task naenkrat, najmanjši potrebni testi in pregled diffov. Ne objavljaj na obstoječi spletni strani.
+
+- **R3.1 – Mobilni pregled in nastavitve (PR za pregled):** celoten Labirint v osnovnem pogledu, izbirna povečava, smerno upravljanje na telefonu; naslov in navigacija po skupnem vzorcu. Osmosmerka: samostojne nastavitve velikosti, težavnosti, smeri in količine besed. Ohrani stare uganke ter rezultate. Brez sprememb javnega gostovanja pred potrditvijo.
