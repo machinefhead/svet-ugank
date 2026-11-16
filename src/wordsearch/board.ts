@@ -3,11 +3,14 @@ import { type PlayState, type Puzzle } from './model.ts'
 
 export function mountBoard(panel: HTMLElement, puzzle: Puzzle, onLine: (from: number, to: number) => void) {
   panel.innerHTML = `
-    <p class="board-instructions" id="board-instructions">Povleci od prve do zadnje črke ali izberi obe končni črki. S tipkovnico uporabi puščice in Enter.</p>
     <div class="letter-grid" role="grid" aria-label="Mreža osmosmerke" aria-describedby="board-instructions"></div>
-    <ul class="word-list" aria-label="Skrite besede"></ul>
-    <div class="board-feedback">
+    <p class="board-instructions" id="board-instructions">Na telefonu se pomikaj po strani z navpičnim potegom. Besedo označi z dotikom prve in zadnje črke. Z miško lahko tudi povlečeš, s tipkovnico pa uporabiš puščice in Enter.</p>
+    <section class="word-list-section" aria-labelledby="word-list-title">
+      <h2 id="word-list-title">Iskane in najdene besede</h2>
       <p class="board-progress" role="status"></p>
+      <ul class="word-list" aria-label="Iskane in najdene besede"></ul>
+    </section>
+    <div class="board-feedback">
       <p class="board-message" role="status"></p>
       <button type="button" class="button secondary exit-solution" hidden>Nazaj k uganki</button>
     </div>`
@@ -36,6 +39,7 @@ export function mountBoard(panel: HTMLElement, puzzle: Puzzle, onLine: (from: nu
 
   const items = puzzle.placements.map(({ word, cells }) => {
     const item = document.createElement('li')
+    item.tabIndex = -1
     const label = document.createElement('span')
     label.textContent = word
     const solution = document.createElement('button')
@@ -115,9 +119,13 @@ export function mountBoard(panel: HTMLElement, puzzle: Puzzle, onLine: (from: nu
     if (locked || cell === null || !event.isPrimary || event.button !== 0 || gesture) return
     if (invalid.length) announce('')
     gesture = { id: event.pointerId, cell }
-    grid.setPointerCapture(event.pointerId)
+    if (event.pointerType !== 'touch') {
+      grid.setPointerCapture(event.pointerId)
+      event.preventDefault()
+    }
+    // Touch keeps native vertical scrolling. A tap selects an endpoint;
+    // a browser-owned scroll triggers pointercancel and cancels the gesture.
     focusCell(cell)
-    event.preventDefault()
   })
   grid.addEventListener('pointermove', (event) => {
     if (gesture?.id !== event.pointerId) return
@@ -185,27 +193,28 @@ export function mountBoard(panel: HTMLElement, puzzle: Puzzle, onLine: (from: nu
     if (locked) clearSelection()
     const foundCells = new Set<number>()
     const solutionCells = new Set<number>()
-    const hintedCells = new Set<number>()
     for (const [i, { word, cells }] of puzzle.placements.entries()) {
       const found = play.found.includes(word)
       const { item, label, solution } = items[i]
       item.classList.toggle('found', found && !viewing)
       item.classList.toggle('solution-word', viewing)
       label.hidden = viewing
-      label.textContent = found ? `✓ ${word}` : word
+      const step = cells[1] - cells[0]
+      const orientation = Math.abs(step) === 1 ? 'vodoravno' :
+        Math.abs(step) === puzzle.size ? 'navpično' : 'diagonalno'
+      label.textContent = found ? `✓ ${word}` :
+        play.hints.includes(word) ? `${word} · namig: ${orientation}` : word
       solution.hidden = !viewing
       solution.setAttribute('aria-pressed', String(solutionWord === word))
       if (found) cells.forEach((cell) => foundCells.add(cell))
       if (viewing && (!solutionWord || solutionWord === word)) cells.forEach((cell) => solutionCells.add(cell))
-      if (!found && play.hints.includes(word)) hintedCells.add(cells[0])
+      item.classList.toggle('hint-word', !found && play.hints.includes(word))
     }
     for (const [i, button] of buttons.entries()) {
       button.classList.toggle('found', !viewing && foundCells.has(i))
       button.classList.toggle('solution', solutionCells.has(i))
-      button.classList.toggle('hinted', !viewing && hintedCells.has(i))
-      button.setAttribute('aria-disabled', String(locked))
-      const flags = [foundCells.has(i) && 'najdena', solutionCells.has(i) && 'rešitev',
-        !viewing && hintedCells.has(i) && 'namig'].filter(Boolean)
+       button.setAttribute('aria-disabled', String(locked))
+      const flags = [foundCells.has(i) && 'najdena', solutionCells.has(i) && 'rešitev'].filter(Boolean)
       button.setAttribute('aria-label', [puzzle.letters[i], ...flags].join(', '))
     }
     grid.classList.toggle('locked', locked)
@@ -237,10 +246,10 @@ export function mountBoard(panel: HTMLElement, puzzle: Puzzle, onLine: (from: nu
       buttons[activeCell].scrollIntoView({ block: 'nearest' })
     },
     focusHint: (word: string) => {
-      const placement = puzzle.placements.find((entry) => entry.word === word)
-      if (!placement) return
-      focusCell(placement.cells[0])
-      buttons[activeCell].scrollIntoView({ block: 'center' })
+      const entry = items.find(({ label }) => label.textContent?.startsWith(word))
+      if (!entry) return
+      entry.item.focus({ preventScroll: true })
+      entry.item.scrollIntoView({ block: 'nearest' })
     },
     viewSolution: () => {
       viewing = true
