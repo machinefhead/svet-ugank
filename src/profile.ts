@@ -1,5 +1,5 @@
 import type { LocalData } from './storage.ts'
-import { describePreset, presets, revision } from './wordsearch/model.ts'
+import { describePreset, revision } from './wordsearch/model.ts'
 import type { Result } from './wordsearch/session.ts'
 
 export function formatTime(ms: number) {
@@ -14,7 +14,8 @@ function resultList(results: readonly Result[]) {
     const item = document.createElement('li')
     const { label } = describePreset(result.level, result.revision)
     const assistance = result.hints === 0 ? 'brez namigov' : result.hints === 1 ? '1 namig' : '2 namiga'
-    item.textContent = `${label} · ${formatTime(result.elapsedMs)} · ${assistance} · ${new Date(result.finishedAt).toLocaleDateString('sl-SI')}`
+    const options = result.options ? ` · ${result.options.size} × ${result.options.size} · ${result.options.directions} smeri` : ''
+    item.textContent = `${label}${options} · ${formatTime(result.elapsedMs)} · ${assistance} · ${new Date(result.finishedAt).toLocaleDateString('sl-SI')}`
     list.append(item)
   }
   return list
@@ -42,16 +43,25 @@ export function renderResults(target: HTMLElement, data: LocalData) {
   if (current.length) {
     const table = document.createElement('table')
     table.className = 'result-table'
-    table.innerHTML = '<caption>Najboljši časi · R2.1</caption><thead><tr><th scope="col">Težavnost</th><th scope="col">Brez namigov</th><th scope="col">Z namigi</th></tr></thead>'
+    table.innerHTML = '<caption>Najboljši časi po nastavitvah</caption><thead><tr><th scope="col">Uganka</th><th scope="col">Brez namigov</th><th scope="col">Z namigi</th></tr></thead>'
     const body = table.createTBody()
-    for (const [level, preset] of Object.entries(presets)) {
+    const groups = new Map<string, Result[]>()
+    for (const result of current) {
+      const { label } = describePreset(result.level, result.revision)
+      const opts = result.options
+      const setting = opts
+        ? `${label} · ${opts.size}×${opts.size} · ${opts.directions} smeri · ${opts.quantity}`
+        : `${label} · prvotna nastavitev`
+      groups.set(setting, [...(groups.get(setting) ?? []), result])
+    }
+    for (const [setting, group] of groups) {
       const row = body.insertRow()
       const heading = document.createElement('th')
       heading.scope = 'row'
-      heading.textContent = preset.label
+      heading.textContent = setting
       row.append(heading)
       for (const assisted of [false, true]) {
-        const best = current.reduce((min, result) => result.level === level && (result.hints > 0) === assisted
+        const best = group.reduce((min, result) => (result.hints > 0) === assisted
           ? Math.min(min, result.elapsedMs) : min, Infinity)
         row.insertCell().textContent = Number.isFinite(best) ? formatTime(best) : '–'
       }
