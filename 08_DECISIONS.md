@@ -52,3 +52,10 @@ Novih odločitev ni dovoljeno prikrito izvajati kot že potrjenih.
 - Osnovni Labirint na telefonu prikazuje celotno mrežo; povečava je namerna dodatna možnost. Ker so velika polja v pregledu fizično premajhna za dotik, mora biti mogoče premikanje s smernim potegom kjerkoli po mreži in s smernimi gumbi. Rešitev mora biti vidna kot celota in izrazito označena.
 - V vseh igrah so nastavitve nad mrežo; gumb »Vse igre« je desno od naslova in ni podvojene povezave »Domov«. Značka stanja stoji desno od podnaslova.
 - Nova Osmosmerka ima neodvisno velikost, težavnost, dovoljene smeri ter količino besed; spremembe se uveljavijo šele ob »Nova uganka«. Obstoječi shranjeni primeri brez dodatnih nastavitev ohranijo stare algoritme in ID-je. Teme besed kasneje.
+
+## Predlog in izvedba R3.2 – 16. 11. 2026 (še v pregledu)
+- Za mobilno Osmosmerko je privzeta izbira začetne in končne črke z dvema dotikoma; drsenje strani po mreži mora ostati možno. Računalnik ohranja izbiro s potegom in tipkovnico.
+- Navodila so pod mrežo črk, seznam z naslovom »Iskane in najdene besede« je spodaj, Namig in Pokaži rešitev sta pod celotno igralno vsebino.
+- Namig Osmosmerke posreduje samo orientacijo (vodoravno, navpično ali diagonalno) ene iskane besede, ne njenega začetnega polja. Uporaba namigov je še vedno zabeležena v rezultatih.
+- Labirint ima dodatno virtualno krmilno palico z mrtvim območjem in štirimi smermi, obdržane so puščice, tipkovnica in miška. V osnovnem pogledu je mreža namenjena tudi običajnemu drsenju strani.
+- **Odprta zasnova:** pri osmosmerki ločiti »Klasična« (samodejne prednastavitve po težavnosti) in »Po meri« (velikost, smeri, količina besed, zahtevnost); spremembe uveljavi šele »Nova uganka«. To še ni implementirano in ni potrjeno kot končna zasnova.
