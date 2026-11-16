@@ -79,8 +79,28 @@ export function mountMazeBoard(
   corridors.setAttribute('d', Array.from(puzzle.open, (isOpen, index) =>
     isOpen ? 'M' + (index % puzzle.width) + ' ' + Math.floor(index / puzzle.width) + 'h1v1h-1z' : ''
   ).join(''))
-  surface.append(wall, corridors)
+  const solutionLine = document.createElementNS(svgNS, 'path')
+  solutionLine.setAttribute('d', puzzle.solution.map((cell, index) =>
+    (index ? 'L' : 'M') + (cell % puzzle.width + 0.5) + ' ' +
+    (Math.floor(cell / puzzle.width) + 0.5)).join(''))
+  solutionLine.setAttribute('fill', 'none')
+  solutionLine.setAttribute('stroke', '#f1ad3b')
+  solutionLine.setAttribute('stroke-width', String(Math.max(0.65, puzzle.width * 0.013)))
+  solutionLine.setAttribute('stroke-linecap', 'round')
+  solutionLine.setAttribute('stroke-linejoin', 'round')
+  solutionLine.style.display = 'none'
+  surface.append(wall, corridors, solutionLine)
   grid.prepend(surface)
+  const playerMarker = document.createElement('span')
+  playerMarker.className = 'maze-player-marker'
+  playerMarker.setAttribute('aria-hidden', 'true')
+  const goalMarker = document.createElement('span')
+  goalMarker.className = 'maze-goal-marker'
+  goalMarker.textContent = '★'
+  goalMarker.setAttribute('aria-hidden', 'true')
+  goalMarker.style.left = ((puzzle.goal % puzzle.width + 0.5) / puzzle.width * 100) + '%'
+  goalMarker.style.top = ((Math.floor(puzzle.goal / puzzle.width) + 0.5) / puzzle.width * 100) + '%'
+  grid.append(goalMarker, playerMarker)
   let position = puzzle.start
   let pointer: number | null = null
   let lastPointer: PointerPoint | null = null
@@ -290,6 +310,8 @@ export function mountMazeBoard(
       cells[position].classList.remove('maze-player')
       position = play.position
       cells[position].classList.add('maze-player')
+      playerMarker.style.left = ((position % puzzle.width + 0.5) / puzzle.width * 100) + '%'
+      playerMarker.style.top = ((Math.floor(position / puzzle.width) + 0.5) / puzzle.width * 100) + '%'
       if (play.visited.length < visited.size) {
         for (const cell of visited) cells[cell].classList.remove('maze-visited')
         visited = new Set()
@@ -319,6 +341,7 @@ export function mountMazeBoard(
       if (show) setZoom(false) // Whole solution must fit on screen, not just the current crop.
       showingSolution = show
       solutionBanner.hidden = !show
+      solutionLine.style.display = show ? '' : 'none'
       for (const cell of puzzle.solution) cells[cell].classList.toggle('maze-solution', show)
     },
     focus() { viewport.focus({ preventScroll: true }) },
