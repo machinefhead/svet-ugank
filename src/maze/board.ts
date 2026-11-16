@@ -11,6 +11,7 @@ export function mountMazeBoard(
   panel: HTMLElement, puzzle: MazePuzzle, move: (cell: number) => void, restart: () => void,
 ) {
   panel.innerHTML = `
+    <p class="maze-solution-banner" role="status" hidden>Rumeno označena pot vodi od začetka (S) do cilja (★). Rešitev je prikazana v celotni mreži; ta uganka ne šteje med rezultate.</p>
     <div class="maze-viewport" tabindex="0" role="group" aria-label="Celoten labirint" aria-describedby="maze-instructions">
       <div class="maze-grid" aria-hidden="true"></div>
     </div>
@@ -29,6 +30,7 @@ export function mountMazeBoard(
       </div>
     </div>`
   const viewport = panel.querySelector<HTMLElement>('.maze-viewport')!
+  const solutionBanner = panel.querySelector<HTMLElement>('.maze-solution-banner')!
   const grid = panel.querySelector<HTMLElement>('.maze-grid')!
   const progress = panel.querySelector<HTMLElement>('.maze-progress')!
   const message = panel.querySelector<HTMLElement>('.board-message')!
@@ -237,6 +239,7 @@ export function mountMazeBoard(
       if (showingSolution === show) return
       if (show) setZoom(false) // Whole solution must fit on screen, not just the current crop.
       showingSolution = show
+      solutionBanner.hidden = !show
       for (const cell of puzzle.solution) cells[cell].classList.toggle('maze-solution', show)
     },
     focus() { viewport.focus({ preventScroll: true }) },
