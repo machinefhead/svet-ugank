@@ -5,8 +5,9 @@ import { formatTime, renderResults } from './profile.ts'
 import { isTheme, normalizeNickname, openLocalData } from './storage.ts'
 import { mountBoard } from './wordsearch/board.ts'
 import { isComplete } from './wordsearch/checker.ts'
-import { generatePuzzle } from './wordsearch/generator.ts'
-import { describePreset, hintLimit, isLevel, presets, puzzleId } from './wordsearch/model.ts'
+import { generatePuzzle, generateConfiguredPuzzle, configuredGenerator } from './wordsearch/generator.ts'
+import { customDirections, customQuantities, customSizes, describePreset, hintLimit,
+  isLevel, presets, puzzleId } from './wordsearch/model.ts'
 import { recordResult, selectWord, startPuzzle, useHint } from './wordsearch/session.ts'
 
 const element = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T
@@ -19,6 +20,9 @@ const playTitle = element('play-title')
 const boardPanel = element('board-panel')
 const theme = element<HTMLSelectElement>('theme')
 const difficulty = element<HTMLSelectElement>('difficulty')
+const wordsearchSize = element<HTMLSelectElement>('wordsearch-size')
+const wordsearchDirections = element<HTMLSelectElement>('wordsearch-directions')
+const wordsearchCount = element<HTMLSelectElement>('wordsearch-count')
 const profileForm = element<HTMLFormElement>('profile-form')
 const nickname = element<HTMLInputElement>('nickname')
 const profileStatus = element('profile-status')
@@ -94,32 +98,58 @@ profileForm.addEventListener('submit', (event) => {
   profileStatus.textContent = save() ? 'Vzdevek je posodobljen na tej napravi.' : 'Vzdevek je posodobljen v tem zavihku.'
   renderResults(element('results'), data)
 })
-for (const [level, { label, size }] of Object.entries(presets)) {
-  difficulty.add(new Option(`${label} · ${size} × ${size}`, level))
+for (const [level, { label }] of Object.entries(presets)) {
+  difficulty.add(new Option(label, level))
 }
+for (const size of customSizes) wordsearchSize.add(new Option(`${size} × ${size}`, String(size)))
+const directionNames = { 2: 'Desno in dol', 4: 'Naprej + diagonali', 8: 'Vseh 8 smeri' }
+for (const directions of customDirections) {
+  wordsearchDirections.add(new Option(directionNames[directions], String(directions)))
+}
+const quantityNames = { few: 'Manj', normal: 'Običajno', many: 'Več' }
+for (const quantity of customQuantities) wordsearchCount.add(new Option(quantityNames[quantity], quantity))
+difficulty.value = data.nextLevel
+wordsearchSize.value = String(data.nextOptions.size)
+wordsearchDirections.value = String(data.nextOptions.directions)
+wordsearchCount.value = data.nextOptions.quantity
 
 function showNextDirections() {
-  nextDirections.textContent = presets[data.nextLevel].directionLabel
+  const config = configuredGenerator(data.nextLevel, data.nextOptions)
+  nextDirections.textContent = `Naslednja: ${config.wordCount} besed · ${directionNames[data.nextOptions.directions]}. Spremembe veljajo šele ob »Nova uganka«.`
 }
 
-difficulty.value = data.nextLevel
-showNextDirections()
-difficulty.addEventListener('change', () => {
+function saveNextWordsearchOptions() {
   if (!isLevel(difficulty.value)) return
   data.nextLevel = difficulty.value
+  const size = Number(wordsearchSize.value)
+  const directions = Number(wordsearchDirections.value)
+  const quantity = wordsearchCount.value
+  if (!customSizes.some((value) => value === size) ||
+      !customDirections.some((value) => value === directions) ||
+      !customQuantities.some((value) => value === quantity)) return
+  data.nextOptions = {
+    size: size as typeof customSizes[number],
+    directions: directions as typeof customDirections[number],
+    quantity: quantity as typeof customQuantities[number],
+  }
   showNextDirections()
   save()
-})
+}
+for (const select of [difficulty, wordsearchSize, wordsearchDirections, wordsearchCount]) {
+  select.addEventListener('change', saveNextWordsearchOptions)
+}
+showNextDirections()
 
 function createPuzzle() {
   try {
     const level = data.nextLevel
     // Avoid reusing a puzzle ID already in progress or recorded as completed.
+    const options = data.nextOptions
     const used = new Set([puzzle?.id, ...data.results.map((result) => result.puzzleId)])
     let seed = crypto.getRandomValues(new Uint32Array(1))[0]
-    while (used.has(puzzleId(level, seed))) seed = (seed + 1) >>> 0
-    const definition = generatePuzzle(level, seed)
-    data.play = startPuzzle(level, seed, Date.now())
+    while (used.has(puzzleId(level, seed, 2, options))) seed = (seed + 1) >>> 0
+    const definition = generateConfiguredPuzzle(level, options, seed)
+    data.play = startPuzzle(level, seed, Date.now(), options)
     puzzle = definition
     save()
     mountWordsearch()
@@ -137,9 +167,12 @@ function mountWordsearch() {
   if (!puzzle || !data.play) return
   board = mountBoard(boardPanel, puzzle, select)
   const { label, directionLabel } = describePreset(puzzle.level, puzzle.revision)
-  const legacy = puzzle.revision === 1 ? ' (R2)' : ''
+  const legacy = puzzle.revision === 1 ? ' (stara uganka)' : ''
+  const directionsText = puzzle.options
+    ? { 2: 'Desno in dol', 4: '4 smeri', 8: '8 smeri' }[puzzle.options.directions]
+    : directionLabel
   applied.textContent =
-    `Trenutno: ${label}${legacy} · ${puzzle.size} × ${puzzle.size} · ${directionLabel}`
+    `Trenutna uganka: ${label}${legacy} · ${puzzle.size} × ${puzzle.size} · ${puzzle.placements.length} besed · ${directionsText}`
   updateBoard()
 }
 
