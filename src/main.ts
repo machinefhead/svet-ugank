@@ -254,8 +254,13 @@ hint.addEventListener('click', () => {
   data.play = next
   save()
   updateBoard()
-  board.announce(`Namig: označena je začetna črka za besedo ${next.hints.at(-1)}.`, 'warning')
-  board.focusHint(next.hints.at(-1)!)
+  const hintedWord = next.hints.at(-1)!
+  const placement = puzzle.placements.find(({ word }) => word === hintedWord)!
+  const step = placement.cells[1] - placement.cells[0]
+  const orientation = Math.abs(step) === 1 ? 'vodoravno' :
+    Math.abs(step) === puzzle.size ? 'navpično' : 'diagonalno'
+  board.announce(`Namig: beseda ${hintedWord} je postavljena ${orientation}. Začetno polje ostane skrito.`, 'warning')
+  board.focusHint(hintedWord)
 })
 reveal.addEventListener('click', () => {
   if (location.hash === '#labirint') return maze.reveal()
@@ -295,6 +300,7 @@ function renderRoute(focus: boolean) {
     element('play-description').textContent = isPlayable(game) ? examples[game].description :
       'To je statičen prikaz zaslona. Reševanje v tej različici še ni na voljo.'
     element('play-options').hidden = !isPlayable(game)
+    element('play-bottom-actions').hidden = !isPlayable(game)
     element('wordsearch-fields').hidden = game !== 'wordsearch'
     element('maze-fields').hidden = game !== 'maze'
     nextDirections.hidden = game !== 'wordsearch'
