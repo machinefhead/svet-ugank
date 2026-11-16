@@ -11,12 +11,12 @@ export function mountMazeBoard(
   panel: HTMLElement, puzzle: MazePuzzle, move: (cell: number) => void, restart: () => void,
 ) {
   panel.innerHTML = `
-    <div class="maze-viewport" tabindex="0" role="group" aria-label="Mreža labirinta" aria-describedby="maze-instructions">
+    <div class="maze-viewport" tabindex="0" role="group" aria-label="Celoten labirint" aria-describedby="maze-instructions">
       <div class="maze-grid" aria-hidden="true"></div>
     </div>
     <div class="board-feedback maze-feedback">
-      <p id="maze-instructions">Klikni ali se dotakni sosednjega polja, povleci po hodniku ali uporabi puščice.</p>
-      <p>● Ti · S Začetek · ★ Cilj · obarvana sled prehojenih polj</p>
+      <p id="maze-instructions">Celotna mreža je vidna. Na telefonu povleci v želeno smer kjerkoli po mreži ali uporabi smerne gumbe. Povečava omogoči natančen ogled.</p>
+      <p>● Ti · S Začetek · ★ Cilj · sled prehojene poti · <strong>rumena pot = ogled rešitve</strong></p>
       <p class="maze-progress" aria-live="polite"></p>
       <p class="board-message" role="status"></p>
     </div>
@@ -54,6 +54,7 @@ export function mountMazeBoard(
   let position = puzzle.start
   let pointer: number | null = null
   let lastPointer: PointerPoint | null = null
+  let touchControl: { x: number; y: number } | null = null
   let locked = false
   let panning = false
   let hintCell: number | null = null
@@ -61,6 +62,7 @@ export function mountMazeBoard(
   let showingSolution = false
 
   function keepInView() {
+    if (!viewport.classList.contains('enlarged')) return
     const tile = cells[position]
     const view = viewport.getBoundingClientRect()
     const box = tile.getBoundingClientRect()
@@ -103,7 +105,27 @@ export function mountMazeBoard(
   }
 
   function followPointer(event: PointerEvent) {
-    if (lastPointer === null || locked) return
+    if (locked) return
+    if (touchControl !== null && !viewport.classList.contains('enlarged')) {
+      // A finger-sized swipe works even when a 121×121 overview has tiny cells.
+      const threshold = 16
+      let dx = event.clientX - touchControl.x
+      let dy = event.clientY - touchControl.y
+      for (let count = 0; count < 24 && Math.max(Math.abs(dx), Math.abs(dy)) >= threshold; count++) {
+        const horizontal = Math.abs(dx) >= Math.abs(dy)
+        const direction = horizontal ? (dx > 0 ? directions.right : directions.left) :
+          (dy > 0 ? directions.down : directions.up)
+        const next = destination(direction)
+        if (canMove(puzzle, position, next)) move(next)
+        if (horizontal) touchControl.x += Math.sign(dx) * threshold
+        else touchControl.y += Math.sign(dy) * threshold
+        dx = event.clientX - touchControl.x
+        dy = event.clientY - touchControl.y
+      }
+      event.preventDefault()
+      return
+    }
+    if (lastPointer === null) return
     const rect = grid.getBoundingClientRect()
     const at: PointerPoint = { x: event.clientX - rect.left, y: event.clientY - rect.top }
     const candidates = cellsAlongSegment(puzzle.width, rect.width / puzzle.width, lastPointer, at)
@@ -123,11 +145,14 @@ export function mountMazeBoard(
     if (panning || locked || pointer !== null || !event.isPrimary || event.button !== 0) return
     const cell = cellAt(event)
     // Starting a drag on a distant wall/tile must not move the player.
-    if (cell < 0 || (cell !== position && !canMove(puzzle, position, cell))) return
+    if (cell < 0) return
+    const steerByTouch = event.pointerType === 'touch' && !viewport.classList.contains('enlarged')
+    if (!steerByTouch && cell !== position && !canMove(puzzle, position, cell)) return
     pointer = event.pointerId
+    touchControl = steerByTouch ? { x: event.clientX, y: event.clientY } : null
     grid.setPointerCapture(pointer)
     viewport.focus({ preventScroll: true })
-    if (cell !== position) move(cell)
+    if (!steerByTouch && cell !== position) move(cell)
     const rect = grid.getBoundingClientRect()
     lastPointer = { x: event.clientX - rect.left, y: event.clientY - rect.top }
     event.preventDefault()
@@ -140,27 +165,36 @@ export function mountMazeBoard(
     followPointer(event) // Some quick swipes deliver their final point only on pointerup.
     pointer = null
     lastPointer = null
+    touchControl = null
   })
   for (const type of ['pointercancel', 'lostpointercapture'] as const) {
     grid.addEventListener(type, (event) => {
       if (event.pointerId !== pointer) return
       pointer = null
       lastPointer = null
+      touchControl = null
     })
   }
 
-  zoom.addEventListener('click', () => {
-    const enlarged = viewport.classList.toggle('enlarged')
+  function setZoom(enlarged: boolean) {
+    viewport.classList.toggle('enlarged', enlarged)
     zoom.setAttribute('aria-pressed', String(enlarged))
+    if (!enlarged) {
+      panning = false
+      viewport.classList.remove('panning')
+      pan.setAttribute('aria-pressed', 'false')
+    }
     keepInView()
-  })
+  }
+  zoom.addEventListener('click', () => setZoom(!viewport.classList.contains('enlarged')))
 
   pan.addEventListener('click', () => {
+    if (!viewport.classList.contains('enlarged')) setZoom(true)
     panning = viewport.classList.toggle('panning')
     pan.setAttribute('aria-pressed', String(panning))
     instructions.textContent = panning
       ? 'Povleci za premik pogleda. Smerni gumbi še vedno premikajo igralca.'
-      : 'Klikni ali se dotakni sosednjega polja, povleci po hodniku ali uporabi puščice.'
+      : 'Na telefonu lahko premikaš igralca s potegi v želeno smer. Za celoten pregled izklopi povečavo.'
   })
   panel.querySelector('.maze-restart')!.addEventListener('click', restart)
 
@@ -201,6 +235,7 @@ export function mountMazeBoard(
     markHint,
     showSolution(show: boolean) {
       if (showingSolution === show) return
+      if (show) setZoom(false) // Whole solution must fit on screen, not just the current crop.
       showingSolution = show
       for (const cell of puzzle.solution) cells[cell].classList.toggle('maze-solution', show)
     },
