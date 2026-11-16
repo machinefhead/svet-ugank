@@ -1,5 +1,6 @@
-import { generatePuzzle } from './wordsearch/generator.ts'
-import { hintLimit, isLevel, isLevelForRevision, isSeed, puzzleId, revision, type Level, type PlayState, type Puzzle } from './wordsearch/model.ts'
+import { generatePuzzle, generateConfiguredPuzzle } from './wordsearch/generator.ts'
+import { defaultWordsearchOptions, hintLimit, isLevel, isLevelForRevision, isSeed, isWordsearchOptions,
+  puzzleId, revision, type Level, type PlayState, type Puzzle, type WordsearchOptions } from './wordsearch/model.ts'
 import type { Result } from './wordsearch/session.ts'
 
 export const storageKey = 'svet-ugank:r2'
@@ -11,6 +12,7 @@ export interface LocalData {
   theme: Theme
   nickname: string
   nextLevel: Level
+  nextOptions: WordsearchOptions
   play: PlayState | null
   results: readonly Result[]
 }
@@ -18,7 +20,8 @@ export interface LocalData {
 type LocalStorage = Pick<Storage, 'getItem' | 'setItem'>
 
 const defaults = (): LocalData => ({
-  version: 2, theme: 'system', nickname: '', nextLevel: 'beginner', play: null, results: [],
+  version: 2, theme: 'system', nickname: '', nextLevel: 'beginner',
+  nextOptions: { ...defaultWordsearchOptions }, play: null, results: [],
 })
 
 export function isTheme(value: unknown): value is Theme {
@@ -52,13 +55,17 @@ function readPlay(value: unknown): { play: PlayState | null; puzzle: Puzzle | nu
     !isLevelForRevision(entry.level, entry.revision) || !isSeed(entry.seed) ||
     !timestamp(entry.startedAt) || typeof entry.revealed !== 'boolean') return empty
   try {
-    const puzzle = generatePuzzle(entry.level, entry.seed, entry.revision)
+    if (entry.options !== undefined && (entry.revision !== revision || !isWordsearchOptions(entry.options))) return empty
+    const puzzle = entry.options && entry.revision === revision && isLevel(entry.level)
+      ? generateConfiguredPuzzle(entry.level, entry.options as WordsearchOptions, entry.seed)
+      : generatePuzzle(entry.level, entry.seed, entry.revision)
     const allowed = new Set(puzzle.placements.map(({ word }) => word))
     const found = uniqueWords(entry.found, allowed)
     const hints = uniqueWords(entry.hints, allowed, hintLimit)
     if (!found || !hints) return empty
     return { puzzle, play: { revision: entry.revision, level: entry.level, seed: entry.seed, startedAt: entry.startedAt,
-      found, hints, revealed: entry.revealed } }
+      found, hints, revealed: entry.revealed,
+      ...(entry.options ? { options: entry.options as WordsearchOptions } : {}) } }
   } catch {
     return empty
   }
@@ -77,11 +84,14 @@ function readResults(value: unknown): Result[] {
     const [, revTag, , seedTag] = entry.puzzleId.split('-')
     const rev = revTag === 'r1' ? 1 : revTag === 'r2' ? revision : null
     const seed = Number(seedTag)
+    if (entry.options !== undefined && (rev !== revision || !isWordsearchOptions(entry.options))) continue
+    const options = entry.options as WordsearchOptions | undefined
     if (rev === null || !isLevelForRevision(entry.level, rev) || !isSeed(seed) ||
-      entry.puzzleId !== puzzleId(entry.level, seed, rev)) continue
+      entry.puzzleId !== puzzleId(entry.level, seed, rev, options)) continue
     ids.add(entry.puzzleId)
     results.push({ puzzleId: entry.puzzleId, revision: rev, level: entry.level, finishedAt: entry.finishedAt,
-      elapsedMs: entry.elapsedMs, hints: entry.hints })
+      elapsedMs: entry.elapsedMs, hints: entry.hints,
+      ...(options ? { options } : {}) })
   }
   return results
 }
@@ -106,6 +116,8 @@ export function openLocalData(getStorage: () => LocalStorage) {
             nickname: typeof entry.nickname === 'string' ? normalizeNickname(entry.nickname) : '',
             nextLevel: entry.version === 1 && entry.nextLevel === 'hard' ? 'medium'
               : isLevel(entry.nextLevel) ? entry.nextLevel : 'beginner',
+            nextOptions: isWordsearchOptions(entry.nextOptions) ? entry.nextOptions
+              : { ...defaultWordsearchOptions },
             play: active.play,
             results: readResults(entry.results),
           }
