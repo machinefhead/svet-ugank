@@ -496,3 +496,78 @@ button:disabled { cursor: default; opacity: .62; }
   .play-bottom-actions .button { flex: 1 1 135px; }
   .board-instructions { margin-top: 12px; margin-bottom: 0; }
 }
+
+/* The maze base is a single SVG surface. Transparent per-cell hit targets do
+   not leave dark horizontal seams when subpixel CSS grid tracks are rounded. */
+.maze-grid { position: relative; touch-action: pan-y pinch-zoom; }
+.maze-surface {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  shape-rendering: crispEdges;
+  z-index: 0;
+}
+.maze-tile { position: relative; z-index: 1; background: transparent; }
+.maze-wall { background: transparent; }
+.maze-visited { background: color-mix(in srgb, var(--paper) 65%, var(--accent)); }
+.maze-solution, .maze-start { background: var(--lavender); color: var(--tile-ink); }
+.maze-solution { background: #f1ad3b; color: #261907; }
+.maze-goal { background: var(--success-fill); color: var(--success-ink); }
+.maze-viewport.panning.enlarged .maze-grid { touch-action: pan-x pan-y; }
+
+.maze-input-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  max-width: 740px;
+  margin: 16px auto 0;
+}
+.maze-thumbstick {
+  position: relative;
+  isolation: isolate;
+  width: 134px;
+  height: 134px;
+  flex: 0 0 134px;
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--paper) 60%, var(--accent));
+  box-shadow: inset 0 0 0 11px var(--paper);
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+.maze-thumbstick.active { cursor: grabbing; border-color: var(--accent); }
+.maze-thumbstick-ring {
+  position: absolute;
+  inset: 24px;
+  border: 1px dashed var(--muted);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.maze-thumbstick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 54px;
+  height: 54px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 0 3px 10px #0003;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.maze-input-row .maze-controls {
+  margin-inline: 0;
+  justify-content: center;
+  flex: 1 1 240px;
+}
+@media (max-width: 640px) {
+  .maze-input-row { gap: 14px; }
+  .maze-thumbstick { width: 128px; height: 128px; flex-basis: 128px; }
+  .maze-input-row .maze-controls { flex-basis: 100%; }
+}
