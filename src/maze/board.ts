@@ -1,6 +1,7 @@
 import { directions, type Direction, type MazePuzzle } from './model.ts'
 import { adjacent, canMove } from './solver.ts'
 import { cellsAlongSegment, legalDragSteps, type PointerPoint } from './pointer.ts'
+import { stickDirection, stickDisplacement } from './stick.ts'
 import type { MazePlay } from './session.ts'
 
 const keyboard: Readonly<Record<string, Direction>> = {
@@ -16,17 +17,23 @@ export function mountMazeBoard(
       <div class="maze-grid" aria-hidden="true"></div>
     </div>
     <div class="board-feedback maze-feedback">
-      <p id="maze-instructions">Celotna mreža je vidna. Na telefonu povleci v želeno smer kjerkoli po mreži ali uporabi smerne gumbe. Povečava omogoči natančen ogled.</p>
+      <p id="maze-instructions">Celotna mreža je vidna. Na telefonu premikaj igralca z okroglo krmilno palico ali s smernimi gumbi. Po mreži lahko drsiš kot po običajni strani. Povečava omogoči podrobnejši ogled.</p>
       <p>● Ti · S Začetek · ★ Cilj · sled prehojene poti · <strong>rumena pot = ogled rešitve</strong></p>
       <p class="maze-progress" aria-live="polite"></p>
       <p class="board-message" role="status"></p>
     </div>
-    <div class="maze-controls">
+    <div class="maze-input-row">
+      <div class="maze-thumbstick" role="group" aria-label="Krmilna palica za premikanje">
+        <div class="maze-thumbstick-ring" aria-hidden="true"></div>
+        <div class="maze-thumbstick-knob" aria-hidden="true"></div>
+      </div>
+      <div class="maze-controls">
       <div class="maze-directions" role="group" aria-label="Premikanje po labirintu"></div>
       <div class="maze-view-actions">
         <button type="button" class="button secondary maze-zoom" aria-pressed="false">Povečava</button>
         <button type="button" class="button secondary maze-pan" aria-pressed="false">Drsenje mreže</button>
         <button type="button" class="button secondary maze-restart">Na začetek</button>
+      </div>
       </div>
     </div>`
   const viewport = panel.querySelector<HTMLElement>('.maze-viewport')!
@@ -35,6 +42,8 @@ export function mountMazeBoard(
   const progress = panel.querySelector<HTMLElement>('.maze-progress')!
   const message = panel.querySelector<HTMLElement>('.board-message')!
   const controls = panel.querySelector<HTMLElement>('.maze-directions')!
+  const stick = panel.querySelector<HTMLElement>('.maze-thumbstick')!
+  const stickKnob = panel.querySelector<HTMLElement>('.maze-thumbstick-knob')!
   const zoom = panel.querySelector<HTMLButtonElement>('.maze-zoom')!
   const pan = panel.querySelector<HTMLButtonElement>('.maze-pan')!
   const instructions = panel.querySelector<HTMLElement>('#maze-instructions')!
@@ -53,6 +62,45 @@ export function mountMazeBoard(
   })
   grid.style.setProperty('--maze-width', String(puzzle.width))
   grid.replaceChildren(...cells)
+  // One continuous SVG surface under transparent cell overlays eliminates
+  // fractional CSS grid seams that appear as horizontal stripes on phones.
+  const svgNS = 'http://www.w3.org/2000/svg'
+  const surface = document.createElementNS(svgNS, 'svg')
+  surface.setAttribute('class', 'maze-surface')
+  surface.setAttribute('viewBox', '0 0 ' + puzzle.width + ' ' + puzzle.width)
+  surface.setAttribute('preserveAspectRatio', 'none')
+  surface.setAttribute('aria-hidden', 'true')
+  const wall = document.createElementNS(svgNS, 'rect')
+  wall.setAttribute('width', String(puzzle.width))
+  wall.setAttribute('height', String(puzzle.width))
+  wall.style.fill = 'var(--action)'
+  const corridors = document.createElementNS(svgNS, 'path')
+  corridors.style.fill = 'var(--paper)'
+  corridors.setAttribute('d', Array.from(puzzle.open, (isOpen, index) =>
+    isOpen ? 'M' + (index % puzzle.width) + ' ' + Math.floor(index / puzzle.width) + 'h1v1h-1z' : ''
+  ).join(''))
+  const solutionLine = document.createElementNS(svgNS, 'path')
+  solutionLine.setAttribute('d', puzzle.solution.map((cell, index) =>
+    (index ? 'L' : 'M') + (cell % puzzle.width + 0.5) + ' ' +
+    (Math.floor(cell / puzzle.width) + 0.5)).join(''))
+  solutionLine.setAttribute('fill', 'none')
+  solutionLine.setAttribute('stroke', '#f1ad3b')
+  solutionLine.setAttribute('stroke-width', String(Math.max(0.65, puzzle.width * 0.013)))
+  solutionLine.setAttribute('stroke-linecap', 'round')
+  solutionLine.setAttribute('stroke-linejoin', 'round')
+  solutionLine.style.display = 'none'
+  surface.append(wall, corridors, solutionLine)
+  grid.prepend(surface)
+  const playerMarker = document.createElement('span')
+  playerMarker.className = 'maze-player-marker'
+  playerMarker.setAttribute('aria-hidden', 'true')
+  const goalMarker = document.createElement('span')
+  goalMarker.className = 'maze-goal-marker'
+  goalMarker.textContent = '★'
+  goalMarker.setAttribute('aria-hidden', 'true')
+  goalMarker.style.left = ((puzzle.goal % puzzle.width + 0.5) / puzzle.width * 100) + '%'
+  goalMarker.style.top = ((Math.floor(puzzle.goal / puzzle.width) + 0.5) / puzzle.width * 100) + '%'
+  grid.append(goalMarker, playerMarker)
   let position = puzzle.start
   let pointer: number | null = null
   let lastPointer: PointerPoint | null = null
@@ -94,6 +142,54 @@ export function mountMazeBoard(
     controls.append(button)
     return button
   })
+
+  let stickPointer: number | null = null
+  let stickDirectionNow: Direction | null = null
+  let stickTimer: ReturnType<typeof setInterval> | null = null
+  function resetStick() {
+    if (stickTimer !== null) clearInterval(stickTimer)
+    stickTimer = null
+    stickPointer = null
+    stickDirectionNow = null
+    stickKnob.style.transform = 'translate(-50%, -50%)'
+    stick.classList.remove('active')
+  }
+  function moveByStick() {
+    if (!stick.isConnected || locked) { resetStick(); return }
+    if (!stickDirectionNow) return
+    const next = destination(directions[stickDirectionNow])
+    if (canMove(puzzle, position, next)) move(next)
+  }
+  function trackStick(event: PointerEvent) {
+    const box = stick.getBoundingClientRect()
+    const dx = event.clientX - (box.left + box.width / 2)
+    const dy = event.clientY - (box.top + box.height / 2)
+    const radius = Math.min(box.width, box.height) * 0.27
+    const target = stickDisplacement(dx, dy, radius)
+    stickDirectionNow = stickDirection(dx, dy, radius * 0.42)
+    stickKnob.style.transform = 'translate(-50%, -50%) translate(' +
+      target.x.toFixed(1) + 'px, ' + target.y.toFixed(1) + 'px)'
+  }
+  stick.addEventListener('pointerdown', (event) => {
+    if (locked || stickPointer !== null || !event.isPrimary || event.button !== 0) return
+    event.preventDefault()
+    stickPointer = event.pointerId
+    stick.classList.add('active')
+    stick.setPointerCapture(event.pointerId)
+    trackStick(event)
+    moveByStick()
+    stickTimer = setInterval(moveByStick, 160)
+  })
+  stick.addEventListener('pointermove', (event) => {
+    if (event.pointerId !== stickPointer) return
+    event.preventDefault()
+    trackStick(event)
+  })
+  for (const kind of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) {
+    stick.addEventListener(kind, (event) => {
+      if (event.pointerId === stickPointer) resetStick()
+    })
+  }
 
   viewport.addEventListener('keydown', (event) => {
     if (!Object.hasOwn(keyboard, event.key) || event.altKey || event.ctrlKey || event.metaKey || panning) return
@@ -144,6 +240,9 @@ export function mountMazeBoard(
   }
 
   grid.addEventListener('pointerdown', (event) => {
+    // On touch devices the map belongs to native scrolling; use the large
+    // thumbstick or directional buttons to move the player.
+    if (event.pointerType === 'touch') return
     if (panning || locked || pointer !== null || !event.isPrimary || event.button !== 0) return
     const cell = cellAt(event)
     // Starting a drag on a distant wall/tile must not move the player.
@@ -196,7 +295,7 @@ export function mountMazeBoard(
     pan.setAttribute('aria-pressed', String(panning))
     instructions.textContent = panning
       ? 'Povleci za premik pogleda. Smerni gumbi še vedno premikajo igralca.'
-      : 'Na telefonu lahko premikaš igralca s potegi v želeno smer. Za celoten pregled izklopi povečavo.'
+      : 'Premikaj se s krmilno palico ali s smernimi gumbi. Za celoten pregled izklopi povečavo.'
   })
   panel.querySelector('.maze-restart')!.addEventListener('click', restart)
 
@@ -211,6 +310,8 @@ export function mountMazeBoard(
       cells[position].classList.remove('maze-player')
       position = play.position
       cells[position].classList.add('maze-player')
+      playerMarker.style.left = ((position % puzzle.width + 0.5) / puzzle.width * 100) + '%'
+      playerMarker.style.top = ((Math.floor(position / puzzle.width) + 0.5) / puzzle.width * 100) + '%'
       if (play.visited.length < visited.size) {
         for (const cell of visited) cells[cell].classList.remove('maze-visited')
         visited = new Set()
@@ -240,6 +341,7 @@ export function mountMazeBoard(
       if (show) setZoom(false) // Whole solution must fit on screen, not just the current crop.
       showingSolution = show
       solutionBanner.hidden = !show
+      solutionLine.style.display = show ? '' : 'none'
       for (const cell of puzzle.solution) cells[cell].classList.toggle('maze-solution', show)
     },
     focus() { viewport.focus({ preventScroll: true }) },
