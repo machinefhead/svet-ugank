@@ -14,3 +14,5 @@
 Brez zavezujočih rokov. En Codeх task naenkrat, najmanjši potrebni testi in pregled diffov. Ne objavljaj na obstoječi spletni strani.
 
 - **R3.1 – Mobilni pregled in nastavitve (PR za pregled):** celoten Labirint v osnovnem pogledu, izbirna povečava, smerno upravljanje na telefonu; naslov in navigacija po skupnem vzorcu. Osmosmerka: samostojne nastavitve velikosti, težavnosti, smeri in količine besed. Ohrani stare uganke ter rezultate. Brez sprememb javnega gostovanja pred potrditvijo.
+
+- **R3.2 – Pregled mobilnih kontrol (Draft):** Osmosmerka ohrani pomikanje strani z dotikom mreže; na telefonu izbira besede z dvema dotikoma, navodila pod črkami, seznam »Iskane in najdene besede«, šibkejši orientacijski namigi ter skupna gumba Namig/Rešitev pod igralnim poljem. Labirint dobi ločeno virtualno krmilno palico, vidnejšega igralca, sklenjeno označeno rešitev in podlago SVG, ki preprečuje vidne špranje med vrsticami. Obstoječe uganke, rezultati in velikosti ostanejo nespremenjeni. Klasična/po meri izbira nastavitev Osmosmerke je predlog za naslednji sklop po potrditvi.
