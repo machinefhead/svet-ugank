@@ -32,3 +32,10 @@ Orodja, modele in pripravo nalog opisuje [docs/CODEX_WORKFLOW.md](docs/CODEX_WOR
 **Referenčni prototip V3:** ostaja v arhivu ChatGPT Project (paket `SvetUgank_START_2026-11-15.zip`). Ni potrjena produkcijska osnova in ga trenutno ne kopiramo v `main`. Če ga Codex potrebuje za inventuro, mora biti dejansko priložen njegovemu delovnemu okolju.
 
 Nobenih sprememb javnega gostovanja ali drugih repozitorijev brez izrecne odobritve lastnika.
+
+## Predogled R3.1 (razvojna veja)
+Na telefonu se Labirint v osnovnem načinu prilega razpoložljivi širini, tudi pri 61 × 61. Po mreži lahko s prstom vlečeš v smeri premikanja, ne da bi moral zadeti drobno piko, ali pa uporabiš smerne gumbe. »Povečava« omogoča natančnejši pogled; »Drsenje mreže« pri povečavi premika pogled. Potrjen ogled rešitve vrne celo mrežo in rumeno označi pot.
+
+Na zaslonu Osmosmerke so nastavitve »Težavnost«, »Velikost«, »Smeri« in »Število besed«. Vse se uporabljajo šele ob »Nova uganka«; stare shranjene uganke se dokončajo po svojih prvotnih pravilih.
+
+GitHub Pages se po potrjeni združitvi na `main` objavi samodejno; za pregled nedokončane razvojne veje uporabi lokalni Vite predogled.

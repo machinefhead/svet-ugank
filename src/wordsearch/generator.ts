@@ -1,7 +1,7 @@
 import { generateLegacyPuzzle } from './generator-v1.ts'
 import {
   directions, isLevel, isLevelForRevision, isSeed, presets, puzzleId, revision,
-  type Direction, type GeneratorConfig, type Placement, type Puzzle, type Revision,
+  type Direction, type GeneratorConfig, type Placement, type Puzzle, type Revision, type WordsearchOptions,
 } from './model.ts'
 import { alphabet, words } from './words.ts'
 
@@ -197,4 +197,50 @@ export function generatePuzzle(level: unknown, seed: number, rev: Revision = rev
   if (rev === 1 && isLevelForRevision(level, 1)) return generateLegacyPuzzle(level, seed)
   if (rev !== revision || !isLevel(level)) throw new RangeError(settingsError)
   return { id: puzzleId(level, seed), revision, level, ...generateGrid(presets[level], seed) }
+}
+
+// The independently selectable options are used only for *new* puzzles.
+// Historical R1/R2 seeds still regenerate with their original exact rules.
+export function configuredGenerator(level: 'beginner' | 'easy' | 'medium', options: WordsearchOptions): GeneratorConfig {
+  if (!isLevel(level) || ![6, 8, 10, 12].includes(options.size) ||
+      ![2, 4, 8].includes(options.directions) ||
+      !['few', 'normal', 'many'].includes(options.quantity)) {
+    throw new RangeError(settingsError)
+  }
+  const size = options.size
+  const base = level === 'beginner' ? Math.round(size * .52) :
+    level === 'easy' ? Math.round(size * .7) : Math.round(size * .85)
+  const offset = options.quantity === 'few' ? -1 : options.quantity === 'many' ? 1 : 0
+  const wordCount = Math.min(16, Math.max(3, base + offset))
+  const maxLength = Math.min(size, level === 'beginner' ? 5 : level === 'easy' ? 6 : 7)
+  const minLength = level === 'medium' && size >= 8 ? 4 : 3
+  const maxOverlap = level === 'beginner' ? 1 : level === 'easy' ? 3 : 5
+  return {
+    size, wordCount, minLength, maxLength,
+    allowedDirections: directions.slice(0, options.directions),
+    overlap: { min: 0, target: level === 'medium' ? 2 : level === 'easy' ? 1 : 0, max: maxOverlap },
+    filler: level === 'medium' ? 'dictionary' : 'uniform',
+    minDirections: Math.min(wordCount, options.directions, level === 'medium' ? 4 : level === 'easy' ? 3 : 2),
+    minDiagonals: options.directions >= 4 ? (level === 'medium' ? 2 : 1) : 0,
+    minReverse: options.directions === 8 ? (level === 'medium' ? 2 : 1) : 0,
+  }
+}
+
+export function generateConfiguredPuzzle(level: 'beginner' | 'easy' | 'medium', options: WordsearchOptions,
+  seed: number): Puzzle {
+  if (!isSeed(seed)) throw new RangeError(settingsError)
+  const config = configuredGenerator(level, options)
+  for (let attempt = 0; attempt < 8; attempt++) {
+    try {
+      // The bounded alternate-seed search is reproducible from the original ID.
+      const alternative = (seed + Math.imul(attempt, 0x9e3779b9)) >>> 0
+      return {
+        id: puzzleId(level, seed, revision, options), revision, level, options: { ...options },
+        ...generateGrid(config, alternative),
+      }
+    } catch (error) {
+      if (!(error instanceof RangeError) || attempt === 7) throw error
+    }
+  }
+  throw new RangeError(layoutError)
 }

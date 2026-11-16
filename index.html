@@ -74,22 +74,32 @@
       </div>
 
       <section class="play" id="play" aria-labelledby="play-title" hidden>
-        <nav class="play-nav" aria-label="Igre">
-          <a class="back-link" href="#igre"><span aria-hidden="true">←</span> Vse igre</a>
-          <a class="back-link" href="#domov">Domov</a>
-        </nav>
         <div class="play-header">
-          <span class="sample-label" id="play-label"></span>
-          <h1 id="play-title" tabindex="-1"></h1>
-          <p id="play-description"></p>
+          <div class="play-headline">
+            <h1 id="play-title" tabindex="-1"></h1>
+            <a class="button secondary play-back" href="#igre"><span aria-hidden="true">←</span> Vse igre</a>
+          </div>
+          <div class="play-description-row">
+            <p id="play-description"></p>
+            <span class="sample-label" id="play-label"></span>
+          </div>
         </div>
         <div class="play-layout">
           <section class="play-options" id="play-options" aria-labelledby="options-title">
             <h2 id="options-title">Nastavitve in dejanja</h2>
             <div class="toolbar-row">
               <div class="toolbar-fields" id="wordsearch-fields">
-                <label for="difficulty">Težavnost in velikost naslednje uganke
-                  <select id="difficulty" aria-describedby="next-directions"></select>
+                <label for="difficulty">Težavnost
+                  <select id="difficulty"></select>
+                </label>
+                <label for="wordsearch-size">Velikost
+                  <select id="wordsearch-size"></select>
+                </label>
+                <label for="wordsearch-directions">Smeri
+                  <select id="wordsearch-directions"></select>
+                </label>
+                <label for="wordsearch-count">Število besed
+                  <select id="wordsearch-count"></select>
                 </label>
               </div>
               <div class="toolbar-fields" id="maze-fields" hidden>
