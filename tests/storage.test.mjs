@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { test } from 'node:test'
 import { openLocalData, storageKey, normalizeNickname } from '../src/storage.ts'
-import { generatePuzzle } from '../src/wordsearch/generator.ts'
+import { generatePuzzle, generateConfiguredPuzzle } from '../src/wordsearch/generator.ts'
 import { recordResult, selectWord, startPuzzle, useHint } from '../src/wordsearch/session.ts'
 
 function memoryStorage() {
@@ -40,7 +40,8 @@ test('valid local results survive reload; malformed progress, fields and duplica
   }))
   const restored = openLocalData(() => storage)
   assert.deepEqual(restored.data, {
-    version: 2, theme: 'system', nickname: '', nextLevel: 'beginner', play: null, results,
+    version: 2, theme: 'system', nickname: '', nextLevel: 'beginner',
+    nextOptions: { size: 6, directions: 2, quantity: 'normal' }, play: null, results,
   })
 })
 
@@ -100,4 +101,28 @@ test('blocked storage, corrupt JSON and future schemas do not prevent local play
   const newer = openLocalData(() => storage)
   assert.equal(newer.save(), false)
   assert.equal(storage.getItem(storageKey), future)
+})
+
+test('independent wordsearch options restore the same board and distinct results', () => {
+  const storage = memoryStorage()
+  const { data, save } = openLocalData(() => storage)
+  data.nextLevel = 'medium'
+  data.nextOptions = { size: 8, directions: 4, quantity: 'few' }
+  const puzzle = generateConfiguredPuzzle(data.nextLevel, data.nextOptions, 77)
+  let play = startPuzzle(data.nextLevel, 77, 100, data.nextOptions)
+  play = selectWord(puzzle, play, puzzle.placements[0].cells[0],
+    puzzle.placements[0].cells.at(-1)).play
+  data.play = play
+  assert.equal(save(), true)
+  const restored = openLocalData(() => storage)
+  assert.deepEqual(restored.data.nextOptions, data.nextOptions)
+  assert.deepEqual(restored.puzzle, puzzle)
+  assert.deepEqual(restored.data.play, play)
+  const finished = { ...play, found: puzzle.placements.map(({ word }) => word) }
+  data.results = recordResult([], puzzle, finished, 200)
+  assert.equal(data.results.length, 1)
+  assert.match(data.results[0].puzzleId, /-s8-d4-qfew-77$/)
+  assert.equal(save(), true)
+  assert.deepEqual(openLocalData(() => storage).data.results, data.results)
+  assert.notEqual(generateConfiguredPuzzle('medium', { size: 8, directions: 8, quantity: 'few' }, 77).id, puzzle.id)
 })
