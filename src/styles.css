@@ -345,6 +345,10 @@ button:disabled { cursor: default; opacity: .62; }
   touch-action: none;
   user-select: none;
 }
+@media (pointer: coarse) {
+  /* Native vertical page scrolling remains possible from the letter grid. */
+  .letter-grid { touch-action: pan-y pinch-zoom; }
+}
 .letter-grid.locked { touch-action: auto; }
 .letter-grid [role="row"] { display: grid; grid-template-columns: repeat(var(--size), minmax(0, 1fr)); }
 .letter-grid button {
@@ -470,4 +474,25 @@ button:disabled { cursor: default; opacity: .62; }
   font-weight: 700;
   line-height: 1.45;
   color: var(--ink);
+}
+
+/* Shared game actions remain below the entire puzzle, not above the board. */
+.play-bottom-actions {
+  width: 100%;
+  max-width: 955px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.word-list-section { max-width: 490px; margin: 22px auto 0; }
+.word-list-section h2 { font-size: 1.2rem; font-weight: 500; }
+.word-list-section .board-progress { margin: 6px 0 8px; color: var(--muted); font-size: .875rem; }
+.word-list-section .word-list { margin-top: 12px; }
+.word-list .hint-word { border-color: var(--warning-ink); }
+@media (max-width: 640px) {
+  .play-bottom-actions { justify-content: center; }
+  .play-bottom-actions .button { flex: 1 1 135px; }
+  .board-instructions { margin-top: 12px; margin-bottom: 0; }
 }
