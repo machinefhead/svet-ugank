@@ -47,3 +47,8 @@ Novih odločitev ni dovoljeno prikrito izvajati kot že potrjenih.
 - Labirint uporablja determinističen Growing Tree revizije 1 in neodvisni izbiri velikosti in težavnosti. Obstoječ recept za obnovo mora ostati dostopen ob uvedbi prihodnje revizije.
 - Osmosmerka in Labirint imata skupne akcije nad mrežo in uporabljata iste potrditvene in čestitne dialoge. Labirint uporablja ločeno lokalno shrambo.
 - GitHub Pages je predviden pod `/svet-ugank/`. Po preverjenih testih Codex pripravi commit, običajen push razvojne veje in Draft PR. Po potrjeni združitvi lahko GitHub Actions objavi iz `main`, ko lastnik vključi Pages. Nastavitve in koraki so v [09_GITHUB_SETUP.md](09_GITHUB_SETUP.md).
+
+## Predlog R3.1 – mobilna uporabnost in nastavitve
+- Osnovni Labirint na telefonu prikazuje celotno mrežo; povečava je namerna dodatna možnost. Ker so velika polja v pregledu fizično premajhna za dotik, mora biti mogoče premikanje s smernim potegom kjerkoli po mreži in s smernimi gumbi. Rešitev mora biti vidna kot celota in izrazito označena.
+- V vseh igrah so nastavitve nad mrežo; gumb »Vse igre« je desno od naslova in ni podvojene povezave »Domov«. Značka stanja stoji desno od podnaslova.
+- Nova Osmosmerka ima neodvisno velikost, težavnost, dovoljene smeri ter količino besed; spremembe se uveljavijo šele ob »Nova uganka«. Obstoječi shranjeni primeri brez dodatnih nastavitev ohranijo stare algoritme in ID-je. Teme besed kasneje.
