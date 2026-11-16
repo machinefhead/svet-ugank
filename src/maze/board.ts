@@ -1,6 +1,7 @@
 import { directions, type Direction, type MazePuzzle } from './model.ts'
 import { adjacent, canMove } from './solver.ts'
 import { cellsAlongSegment, legalDragSteps, type PointerPoint } from './pointer.ts'
+import { stickDirection, stickDisplacement } from './stick.ts'
 import type { MazePlay } from './session.ts'
 
 const keyboard: Readonly<Record<string, Direction>> = {
@@ -21,12 +22,18 @@ export function mountMazeBoard(
       <p class="maze-progress" aria-live="polite"></p>
       <p class="board-message" role="status"></p>
     </div>
-    <div class="maze-controls">
+    <div class="maze-input-row">
+      <div class="maze-thumbstick" role="group" aria-label="Krmilna palica za premikanje">
+        <div class="maze-thumbstick-ring" aria-hidden="true"></div>
+        <div class="maze-thumbstick-knob" aria-hidden="true"></div>
+      </div>
+      <div class="maze-controls">
       <div class="maze-directions" role="group" aria-label="Premikanje po labirintu"></div>
       <div class="maze-view-actions">
         <button type="button" class="button secondary maze-zoom" aria-pressed="false">Povečava</button>
         <button type="button" class="button secondary maze-pan" aria-pressed="false">Drsenje mreže</button>
         <button type="button" class="button secondary maze-restart">Na začetek</button>
+      </div>
       </div>
     </div>`
   const viewport = panel.querySelector<HTMLElement>('.maze-viewport')!
@@ -35,6 +42,8 @@ export function mountMazeBoard(
   const progress = panel.querySelector<HTMLElement>('.maze-progress')!
   const message = panel.querySelector<HTMLElement>('.board-message')!
   const controls = panel.querySelector<HTMLElement>('.maze-directions')!
+  const stick = panel.querySelector<HTMLElement>('.maze-thumbstick')!
+  const stickKnob = panel.querySelector<HTMLElement>('.maze-thumbstick-knob')!
   const zoom = panel.querySelector<HTMLButtonElement>('.maze-zoom')!
   const pan = panel.querySelector<HTMLButtonElement>('.maze-pan')!
   const instructions = panel.querySelector<HTMLElement>('#maze-instructions')!
@@ -53,6 +62,25 @@ export function mountMazeBoard(
   })
   grid.style.setProperty('--maze-width', String(puzzle.width))
   grid.replaceChildren(...cells)
+  // One continuous SVG surface under transparent cell overlays eliminates
+  // fractional CSS grid seams that appear as horizontal stripes on phones.
+  const svgNS = 'http://www.w3.org/2000/svg'
+  const surface = document.createElementNS(svgNS, 'svg')
+  surface.setAttribute('class', 'maze-surface')
+  surface.setAttribute('viewBox', '0 0 ' + puzzle.width + ' ' + puzzle.width)
+  surface.setAttribute('preserveAspectRatio', 'none')
+  surface.setAttribute('aria-hidden', 'true')
+  const wall = document.createElementNS(svgNS, 'rect')
+  wall.setAttribute('width', String(puzzle.width))
+  wall.setAttribute('height', String(puzzle.width))
+  wall.style.fill = 'var(--action)'
+  const corridors = document.createElementNS(svgNS, 'path')
+  corridors.style.fill = 'var(--paper)'
+  corridors.setAttribute('d', Array.from(puzzle.open, (isOpen, index) =>
+    isOpen ? 'M' + (index % puzzle.width) + ' ' + Math.floor(index / puzzle.width) + 'h1v1h-1z' : ''
+  ).join(''))
+  surface.append(wall, corridors)
+  grid.prepend(surface)
   let position = puzzle.start
   let pointer: number | null = null
   let lastPointer: PointerPoint | null = null
@@ -94,6 +122,54 @@ export function mountMazeBoard(
     controls.append(button)
     return button
   })
+
+  let stickPointer: number | null = null
+  let stickDirectionNow: Direction | null = null
+  let stickTimer: ReturnType<typeof setInterval> | null = null
+  function resetStick() {
+    if (stickTimer !== null) clearInterval(stickTimer)
+    stickTimer = null
+    stickPointer = null
+    stickDirectionNow = null
+    stickKnob.style.transform = 'translate(-50%, -50%)'
+    stick.classList.remove('active')
+  }
+  function moveByStick() {
+    if (!stick.isConnected || locked) { resetStick(); return }
+    if (!stickDirectionNow) return
+    const next = destination(directions[stickDirectionNow])
+    if (canMove(puzzle, position, next)) move(next)
+  }
+  function trackStick(event: PointerEvent) {
+    const box = stick.getBoundingClientRect()
+    const dx = event.clientX - (box.left + box.width / 2)
+    const dy = event.clientY - (box.top + box.height / 2)
+    const radius = Math.min(box.width, box.height) * 0.27
+    const target = stickDisplacement(dx, dy, radius)
+    stickDirectionNow = stickDirection(dx, dy, radius * 0.42)
+    stickKnob.style.transform = 'translate(-50%, -50%) translate(' +
+      target.x.toFixed(1) + 'px, ' + target.y.toFixed(1) + 'px)'
+  }
+  stick.addEventListener('pointerdown', (event) => {
+    if (locked || stickPointer !== null || !event.isPrimary || event.button !== 0) return
+    event.preventDefault()
+    stickPointer = event.pointerId
+    stick.classList.add('active')
+    stick.setPointerCapture(event.pointerId)
+    trackStick(event)
+    moveByStick()
+    stickTimer = setInterval(moveByStick, 160)
+  })
+  stick.addEventListener('pointermove', (event) => {
+    if (event.pointerId !== stickPointer) return
+    event.preventDefault()
+    trackStick(event)
+  })
+  for (const kind of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) {
+    stick.addEventListener(kind, (event) => {
+      if (event.pointerId === stickPointer) resetStick()
+    })
+  }
 
   viewport.addEventListener('keydown', (event) => {
     if (!Object.hasOwn(keyboard, event.key) || event.altKey || event.ctrlKey || event.metaKey || panning) return
@@ -144,6 +220,9 @@ export function mountMazeBoard(
   }
 
   grid.addEventListener('pointerdown', (event) => {
+    // On touch devices the map belongs to native scrolling; use the large
+    // thumbstick or directional buttons to move the player.
+    if (event.pointerType === 'touch') return
     if (panning || locked || pointer !== null || !event.isPrimary || event.button !== 0) return
     const cell = cellAt(event)
     // Starting a drag on a distant wall/tile must not move the player.
