@@ -1,41 +1,30 @@
 # Svet ugank
 
-Slovenska spletna igralnica za otroke in odrasle. Začetni razvoj: **Osmosmerka, Križanka, Sudoku, Labirint**.
+Slovenska spletna igralnica v razvoju. Predvidene prve vrste so Osmosmerka, Skandinavska križanka, Sudoku in Labirint.
 
-**Status R3:** Osmosmerka in Labirint sta igralna. Skandinavska križanka in Sudoku sta vzorčna prikaza DEMO. Brskalnik hrani lokalni vzdevek, temo, aktivni uganki in osebne rezultate. Aktivno Osmosmerko R2 lahko nadaljuješ, prejšnji časi pa so v zgodovini R2 na naslovnici.
+## Trenutno stanje razvojne veje R4
+
+**Razvoj Osmosmerke in Labirinta je na izrecno željo lastnika ustavljen.** Njuni implementaciji (generatorji, seje, igralna polja, upravljanje in testi) sta odstranjeni iz te razvojne veje. V katalogu ostajata označeni **V prenovi**, vendar ju ni mogoče igrati. Naslednja zasnova še ni dogovorjena; ne začni ju samodejno znova implementirati.
+
+Sudoku in Skandinavska križanka sta še vedno samo statična prikaza **DEMO**. Razdelek **Za dva ali več igralcev** vsebuje zgolj neaktivne napovedi Križec-krožec, Štiri v vrsto in Zračni hokej.
+
+Ohranjeni so naslovnica, izbor iger, svetla/temna/sistemska tema in demonstracijska prikaza. Vmesnik nima lokalnega vzdevka in osebnih rezultatov. Obstoječi stari podatki v brskalnikovi shrambi niso izbrisani, vendar jih stran ne prikazuje.
 
 ## Lokalni zagon
 
-Z Node.js 24 v projektni mapi zaženi `npm ci` in `npm run dev`, nato odpri lokalni naslov, ki ga izpiše Vite. Ciljni preizkusi Labirinta in shrambe tečejo z `node --test tests/maze.test.mjs tests/storage.test.mjs`. Produkcijsko gradnjo preveri z `npm run build` in `npm run preview`.
+V projektni mapi z ustreznim Node.js zaženi:
 
-Za hiter pregled na naslovnici po želji nastavi vzdevek, nato prek »Začni igrati« odpri Osmosmerko. Najdi besedo, spremeni težavnost in osveži stran. Ista mreža in zelena najdena beseda morata ostati prikazani. Novo stopnjo uveljavi z »Nova uganka« in potrditvijo zamenjave. Po dokončanju se vrni na naslovnico in preveri en zapis v »Mojih rezultatih«. Na telefonu preizkusi vlečenje ali dva dotika končnih črk.
+```sh
+npm ci
+npm run dev
+```
 
-V Labirintu uporabi smerne gumbe, puščice na fokusirani mreži, dotik sosednjega polja ali vlečenje po hodniku. Za veliko mrežo sta pod njo »Povečava« in »Drsenje mreže«. »Na začetek« ohrani isto mrežo. Namig označi samo naslednji korak. Potrjen ogled rešitve izključi rezultat za to uganko tudi po ponovnem začetku.
+Za preverjanje ostalega ogrodja: `npm test` in `npm run build`.
 
-Gradnja uporablja pot `/svet-ugank/`. Postopek prve objave po potrjeni združitvi in nastavitev Pages sta v [navodilih za GitHub](09_GITHUB_SETUP.md). Lokalni napredek z localhosta na github.io ne preide samodejno.
+Vite uporablja osnovno pot `/svet-ugank/`. Razvojna veja ni javna objava. Javni GitHub Pages se posodobi šele po izrecno odobreni združitvi v `main`.
 
-## Začni tukaj
-1. [00_START_HERE.md](00_START_HERE.md) — aktualno stanje in omejitve
-2. [08_DECISIONS.md](08_DECISIONS.md) — potrjene odločitve
-3. [01_PRODUCT_SPEC.md](01_PRODUCT_SPEC.md) — namen in obseg
-4. [02_GAME_REQUIREMENTS.md](02_GAME_REQUIREMENTS.md) — merila štirih ugank
-5. [03_UI_UX.md](03_UI_UX.md) — izkušnja in oblikovanje
-6. [04_PROFILES_OFFLINE_SYNC.md](04_PROFILES_OFFLINE_SYNC.md) — lokalni profili zdaj, strežniški pozneje
-7. [05_ARCHITECTURE.md](05_ARCHITECTURE.md) — modularna zasnova
-8. [06_ROADMAP.md](06_ROADMAP.md) — zaporedje razvoja
-9. [07_QA_ACCEPTANCE.md](07_QA_ACCEPTANCE.md) — preverjanje kakovosti
-10. [09_GITHUB_SETUP.md](09_GITHUB_SETUP.md) — proces dela
-11. [AGENTS.md](AGENTS.md) — navodila za Codex
+## Projektni dokumenti
 
-Orodja, modele in pripravo nalog opisuje [docs/CODEX_WORKFLOW.md](docs/CODEX_WORKFLOW.md).
+Izhodišča so v `00_START_HERE.md`, `01_PRODUCT_SPEC.md`, `02_GAME_REQUIREMENTS.md`, `03_UI_UX.md`, `05_ARCHITECTURE.md`, `06_ROADMAP.md` in `08_DECISIONS.md`. Stari zapisi o izvedbah R2–R4 so zgodovina razvoja, ne opis trenutnih delujočih iger. Prototip V3 ostaja referenca in ni potrjena produkcijska osnova.
 
-**Referenčni prototip V3:** ostaja v arhivu ChatGPT Project (paket `SvetUgank_START_2026-11-15.zip`). Ni potrjena produkcijska osnova in ga trenutno ne kopiramo v `main`. Če ga Codex potrebuje za inventuro, mora biti dejansko priložen njegovemu delovnemu okolju.
-
-Nobenih sprememb javnega gostovanja ali drugih repozitorijev brez izrecne odobritve lastnika.
-
-## Predogled R3.1 (razvojna veja)
-Na telefonu se Labirint v osnovnem načinu prilega razpoložljivi širini, tudi pri 61 × 61. Po mreži lahko s prstom vlečeš v smeri premikanja, ne da bi moral zadeti drobno piko, ali pa uporabiš smerne gumbe. »Povečava« omogoča natančnejši pogled; »Drsenje mreže« pri povečavi premika pogled. Potrjen ogled rešitve vrne celo mrežo in rumeno označi pot.
-
-Na zaslonu Osmosmerke so nastavitve »Težavnost«, »Velikost«, »Smeri« in »Število besed«. Vse se uporabljajo šele ob »Nova uganka«; stare shranjene uganke se dokončajo po svojih prvotnih pravilih.
-
-GitHub Pages se po potrjeni združitvi na `main` objavi samodejno; za pregled nedokončane razvojne veje uporabi lokalni Vite predogled.
+**Do naslednjih lastnikovih navodil ne dodajaj novega generatorja, igralne mehanike ali nove vrste igre.**

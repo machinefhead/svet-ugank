@@ -1,154 +1,63 @@
-import { generatePuzzle, generateConfiguredPuzzle } from './wordsearch/generator.ts'
-import { defaultWordsearchOptions, hintLimit, isLevel, isLevelForRevision, isSeed, isWordsearchOptions,
-  puzzleId, revision, type Level, type PlayState, type Puzzle, type WordsearchOptions } from './wordsearch/model.ts'
-import type { Result } from './wordsearch/session.ts'
+type Store = Pick<Storage, 'getItem' | 'setItem'>
+type GetStore = () => Store
 
-export const storageKey = 'svet-ugank:r2'
-export const nicknameLimit = 24
 export type Theme = 'system' | 'light' | 'dark'
+export const isTheme = (value: unknown): value is Theme => value === 'system' || value === 'light' || value === 'dark'
 
-export interface LocalData {
-  version: 2
-  theme: Theme
-  nickname: string
-  nextLevel: Level
-  nextOptions: WordsearchOptions
-  play: PlayState | null
-  results: readonly Result[]
-}
-
-type LocalStorage = Pick<Storage, 'getItem' | 'setItem'>
-
-const defaults = (): LocalData => ({
-  version: 2, theme: 'system', nickname: '', nextLevel: 'beginner',
-  nextOptions: { ...defaultWordsearchOptions }, play: null, results: [],
-})
-
-export function isTheme(value: unknown): value is Theme {
-  return value === 'system' || value === 'light' || value === 'dark'
-}
-
-export function normalizeNickname(value: string) {
-  return value.replace(/[\p{Cc}\p{Cf}]/gu, '').trim().slice(0, nicknameLimit).trimEnd()
-}
-
-function object(value: unknown): Record<string, unknown> | null {
+export function record(value: unknown): Record<string, unknown> | null {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
     ? value as Record<string, unknown> : null
 }
 
-function timestamp(value: unknown): value is number {
-  return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 && value <= 8.64e15
-}
-
-function uniqueWords(value: unknown, allowed: Set<string>, max = allowed.size): string[] | null {
-  if (!Array.isArray(value) || value.length > max ||
-    !value.every((word): word is string => typeof word === 'string' && allowed.has(word)) ||
-    new Set(value).size !== value.length) return null
-  return value
-}
-
-function readPlay(value: unknown): { play: PlayState | null; puzzle: Puzzle | null } {
-  const empty = { play: null, puzzle: null }
-  const entry = object(value)
-  if (!entry || (entry.revision !== 1 && entry.revision !== revision) ||
-    !isLevelForRevision(entry.level, entry.revision) || !isSeed(entry.seed) ||
-    !timestamp(entry.startedAt) || typeof entry.revealed !== 'boolean') return empty
+export function readLegacy(getStore: GetStore, key: 'svet-ugank:r2' | 'svet-ugank:maze', field: 'theme' | 'play' | 'active') {
   try {
-    if (entry.options !== undefined && (entry.revision !== revision || !isWordsearchOptions(entry.options))) return empty
-    const puzzle = entry.options && entry.revision === revision && isLevel(entry.level)
-      ? generateConfiguredPuzzle(entry.level, entry.options as WordsearchOptions, entry.seed)
-      : generatePuzzle(entry.level, entry.seed, entry.revision)
-    const allowed = new Set(puzzle.placements.map(({ word }) => word))
-    const found = uniqueWords(entry.found, allowed)
-    const hints = uniqueWords(entry.hints, allowed, hintLimit)
-    if (!found || !hints) return empty
-    return { puzzle, play: { revision: entry.revision, level: entry.level, seed: entry.seed, startedAt: entry.startedAt,
-      found, hints, revealed: entry.revealed,
-      ...(entry.options ? { options: entry.options as WordsearchOptions } : {}) } }
+    return record(JSON.parse(getStore().getItem(key) ?? 'null'))?.[field]
   } catch {
-    return empty
+    return null
   }
 }
-
-function readResults(value: unknown): Result[] {
-  if (!Array.isArray(value)) return []
-  const ids = new Set<string>()
-  const results: Result[] = []
-  for (const valueEntry of value) {
-    const entry = object(valueEntry)
-    if (!entry || typeof entry.puzzleId !== 'string' ||
-      !timestamp(entry.finishedAt) || !timestamp(entry.elapsedMs) || entry.elapsedMs > entry.finishedAt ||
-      typeof entry.hints !== 'number' || !Number.isInteger(entry.hints) || entry.hints < 0 ||
-      entry.hints > hintLimit || ids.has(entry.puzzleId)) continue
-    const parts = entry.puzzleId.split('-')
-    const revTag = parts[1]
-    const seedTag = parts.at(-1)
-    const rev = revTag === 'r1' ? 1 : revTag === 'r2' ? revision : null
-    const seed = Number(seedTag)
-    if (entry.options !== undefined && (rev !== revision || !isWordsearchOptions(entry.options))) continue
-    const options = entry.options as WordsearchOptions | undefined
-    if (rev === null || !isLevelForRevision(entry.level, rev) || !isSeed(seed) ||
-      entry.puzzleId !== puzzleId(entry.level, seed, rev, options)) continue
-    ids.add(entry.puzzleId)
-    results.push({ puzzleId: entry.puzzleId, revision: rev, level: entry.level, finishedAt: entry.finishedAt,
-      elapsedMs: entry.elapsedMs, hints: entry.hints,
-      ...(options ? { options } : {}) })
-  }
-  return results
-}
-
-export function openLocalData(getStorage: () => LocalStorage) {
-  let data = defaults()
-  let puzzle: Puzzle | null = null
+export function openSlot<T>(getStore: GetStore, name: string, decode: (value: unknown) => T | null, encode: (value: T) => unknown = (value) => value) {
+  const key = 'svet-ugank:r4:' + name
+  const version = 1
+  let value: T | null = null
+  let invalid = false
+  let future = false
   let available = false
-  let supported = true
+
   try {
-    const storage = getStorage()
-    const raw = storage.getItem(storageKey)
+    const store = getStore()
+    const raw = store.getItem(key)
     if (raw !== null) {
       try {
-        const entry = object(JSON.parse(raw))
-        if (entry?.version === 1 || entry?.version === 2) {
-          const active = readPlay(entry.play)
-          puzzle = active.puzzle
-          data = {
-            version: 2,
-            theme: isTheme(entry.theme) ? entry.theme : 'system',
-            nickname: typeof entry.nickname === 'string' ? normalizeNickname(entry.nickname) : '',
-            nextLevel: entry.version === 1 && entry.nextLevel === 'hard' ? 'medium'
-              : isLevel(entry.nextLevel) ? entry.nextLevel : 'beginner',
-            nextOptions: isWordsearchOptions(entry.nextOptions) ? entry.nextOptions
-              : { ...defaultWordsearchOptions },
-            play: active.play,
-            results: readResults(entry.results),
-          }
-        } else if (entry && typeof entry.version === 'number' && entry.version > 2) {
-          supported = false
-        }
+        const entry = record(JSON.parse(raw))
+        future = typeof entry?.version === 'number' && entry.version > version
+        if (entry?.version === version) value = decode(entry.value)
       } catch {
-        // Malformed JSON is recoverable with the next intentional save.
+        // A corrupt session can be replaced by an explicit new start.
       }
+      invalid = value === null
     }
-    if (supported) {
-      // Check write access without replacing a saved game, even on a read-only visit.
-      storage.setItem(storageKey, raw ?? JSON.stringify(data))
-      available = true
-    }
+    available = !future
   } catch {
-    // Play remains available with this tab's in-memory data.
+    // Reads and writes may be restricted by the browser.
   }
 
-  const save = () => {
-    if (!supported) return false
-    try {
-      getStorage().setItem(storageKey, JSON.stringify(data))
-      available = true
-    } catch {
-      available = false
-    }
-    return available
+  return {
+    get value() { return value },
+    get invalid() { return invalid },
+    get available() { return available },
+    save(next: T) {
+      value = next
+      invalid = false
+      if (!future) {
+        try {
+          getStore().setItem(key, JSON.stringify({ version, value: encode(next) }))
+          available = true
+        } catch {
+          available = false
+        }
+      }
+      return available
+    },
   }
-
-  return { data, puzzle, save, get available() { return available } }
 }

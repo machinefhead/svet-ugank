@@ -1,10 +1,11 @@
 # 00 — Začetek
 
-**15. 11. 2026 — začetna projektna veja za pregled.** Dokumenti so izhodišče; niso dokaz delujoče aplikacije.
+**17. 11. 2026 — R4: razvoj Osmosmerke in Labirinta je na željo lastnika ustavljen.** Dokumenti opisujejo tudi zgodovinske faze; niso dokaz trenutnih igralnih funkcij.
 
 Cilj: lahka, lepo oblikovana slovenska igralnica z možnostjo ponavljanja kakovostnih ugank ter kasneje PDF in fizičnih zbirk. Začetni razvoj zajema samo Osmosmerko, pravo skandinavsko Križanko, Sudoku in Labirint.
 
 ## Trenutno
+- V razvojni veji R4 sta obe izvedbi Osmosmerke in Labirinta odstranjeni; kartici sta označeni »V prenovi«. Čakamo nove zahteve lastnika. Lokalni zagon in dejansko stanje sta opisana v [README](README.md).
 - ChatGPT Project »Svet ugank« je ustvarjen; predajni ZIP je dodan v Project.
 - Repozitorij `machinefhead/svet-ugank` je ob preverjanju za R3 javen. Za objavo glej postopek za GitHub Pages v [09_GITHUB_SETUP.md](09_GITHUB_SETUP.md).
 - V3 je neodobren prototip. Nekatere zamisli in algoritme lahko ponovno uporabimo šele po pregledu.

@@ -50,26 +50,18 @@
             </div>
           </section>
 
-          <section class="profile-panel" aria-labelledby="profile-title">
-            <h2 id="profile-title">Moji rezultati</h2>
-            <p id="storage-description">Napredek in rezultati so na tej napravi. Brisanje podatkov brskalnika jih odstrani.</p>
-            <form id="profile-form">
-              <label for="nickname">Lokalni vzdevek (neobvezno)</label>
-              <div class="profile-edit">
-                <input id="nickname" type="text" maxlength="24" placeholder="Gost" autocomplete="off">
-                <button class="button secondary" type="submit">Shrani vzdevek</button>
-              </div>
-            </form>
-            <p id="profile-status" role="status"></p>
-            <div id="results"></div>
-            <div id="maze-results"></div>
-          </section>
         </div>
 
         <section class="games" id="igre" aria-labelledby="games-title" hidden>
           <a class="back-link" href="#domov"><span aria-hidden="true">←</span> Domov</a>
           <h1 id="games-title" tabindex="-1">Izberi igro</h1>
+          <h2>Za enega igralca</h2>
           <div class="game-list" id="game-list"></div>
+          <section class="coming-games" aria-labelledby="coming-title">
+            <h2 id="coming-title">Za dva ali več igralcev</h2>
+            <p id="coming-status">Prihaja kmalu</p>
+            <ul class="coming-list" id="coming-list" aria-describedby="coming-status"></ul>
+          </section>
         </section>
       </div>
 
@@ -77,73 +69,25 @@
         <div class="play-header">
           <div class="play-headline">
             <h1 id="play-title" tabindex="-1"></h1>
-            <a class="button secondary play-back" href="#igre"><span aria-hidden="true">←</span> Vse igre</a>
+            <a class="button secondary play-back" href="#igre"><span aria-hidden="true">←</span> Nazaj na igre</a>
           </div>
           <div class="play-description-row">
             <p id="play-description"></p>
-            <span class="sample-label" id="play-label"></span>
+            <span class="sample-label" id="play-label" hidden>DEMO</span>
           </div>
         </div>
         <div class="play-layout">
-          <section class="play-options" id="play-options" aria-labelledby="options-title">
-            <h2 id="options-title">Nastavitve in dejanja</h2>
-            <div class="toolbar-row">
-              <div class="toolbar-fields" id="wordsearch-fields">
-                <label for="difficulty">Težavnost
-                  <select id="difficulty"></select>
-                </label>
-                <label for="wordsearch-size">Velikost
-                  <select id="wordsearch-size"></select>
-                </label>
-                <label for="wordsearch-directions">Smeri
-                  <select id="wordsearch-directions"></select>
-                </label>
-                <label for="wordsearch-count">Število besed
-                  <select id="wordsearch-count"></select>
-                </label>
-              </div>
-              <div class="toolbar-fields" id="maze-fields" hidden>
-                <label for="maze-size">Velikost naslednje uganke
-                  <select id="maze-size"></select>
-                </label>
-                <label for="maze-level">Težavnost naslednje uganke
-                  <select id="maze-level"></select>
-                </label>
-              </div>
-              <div class="toolbar-actions">
-                <button class="button primary" id="new-puzzle" type="button">Nova uganka</button>
-                <button class="button secondary" id="hint" type="button" disabled>Namig</button>
-                <button class="button secondary" id="reveal" type="button" disabled>Pokaži rešitev</button>
-              </div>
-            </div>
-            <p class="applied-difficulty" id="next-directions"></p>
-            <p class="applied-difficulty" id="applied-difficulty"></p>
+          <section class="play-options" aria-labelledby="setup-title">
+            <h2 id="setup-title">V pripravi</h2>
+            <p id="setup-message"></p>
           </section>
-          <div class="board-panel" id="board-panel"></div>
+          <div class="board-panel" id="board-panel" hidden></div>
         </div>
       </section>
     </main>
 
     <p class="storage-notice wrap" id="storage-notice" role="status" hidden>Lokalno shranjevanje ni na voljo. Spremembe lahko izgubiš, ko zapreš ali osvežiš stran.</p>
 
-    <dialog id="congratulations" aria-labelledby="congratulations-title" aria-describedby="congratulations-text">
-      <form method="dialog" class="congratulations">
-        <span class="celebration" aria-hidden="true">✦</span>
-        <h2 id="congratulations-title">Bravo!</h2>
-        <p id="congratulations-text">Uspešno si rešil uganko.</p>
-        <button class="button primary" autofocus>Nazaj k uganki</button>
-      </form>
-    </dialog>
-    <dialog id="confirm" aria-labelledby="confirm-title" aria-describedby="confirm-text">
-      <form method="dialog" class="congratulations confirmation">
-        <h2 id="confirm-title"></h2>
-        <p id="confirm-text"></p>
-        <div class="dialog-actions">
-          <button class="button secondary" value="cancel" autofocus>Prekliči</button>
-          <button class="button primary" id="confirm-action" value="accept"></button>
-        </div>
-      </form>
-    </dialog>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

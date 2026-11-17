@@ -1,24 +1,20 @@
 # 02 — Zahteve za igre
 
 ## Skupna pravila
-Vsaka uganka ima stabilen `puzzleId`, revizijo, vrsto, nastavitve, definicijo in preverljivo rešitev. Generator in preverjevalnik sta ločena od prikaza. Zamenjava nastavitev trenutne uganke ne spreminja; zažene jo šele »Nova uganka«. Uspešno dokončanje prikaže modal. Ogledu rešitve sledi izrecna potrditev.
+Vsaka igralna uganka ima stabilen ID, revizijo, uporabljene nastavitve in preverljivo rešitev. Generator in preverjevalnik sta ločena od prikaza. Izbira igre odpre nastavitve. »Začni igro« izdela mrežo, »Nadaljuj« obnovi shranjeno sejo, »Nova uganka« pa vrne na nastavitve. Za zamenjavo nedokončane uganke je potrebna potrditev. Uspešno dokončanje prikaže čestitko. Celotno rešitev odpre izrecna potrditev in po vrnitvi je igralni napredek isti.
 
 ## Osmosmerka
-- Pravilno ime v UI: »Osmosmerka«.
-- R2.1 za nove uganke ponuja tri prednastavitve. Izbira začne veljati z »Nova uganka«.
 
-| Stopnja | Mreža | Besede | Smeri | Prekrivanja |
+| Klasična stopnja | Mreža | Besede | Dolžina | Smeri |
 | --- | --- | --- | --- | --- |
-| Začetna | 6 × 6 | 4 dolžine 3–4 | Desno in dol | 0–1, cilj 0 |
-| Lahka | 8 × 8 | 6 dolžine 3–5 | Desno, dol, diagonali navzdol | 0–2, cilj 1 |
-| Srednja | 10 × 10 | 8 dolžine 4–7 | Vseh osem možnih; vsaj štiri različne, vsaj dve diagonalni in dve obratni postavitvi | 2–5, cilj 3 |
+| Začetna | 6 × 6 | 4 | 3–4 | Desno in dol |
+| Lahka | 8 × 8 | 6 | 3–5 | Desno, dol in diagonali navzdol |
+| Srednja | 10 × 10 | 8 | 4–7 | Vseh osem |
+| Težka | 12 × 12 | 12 | 5–10 | Vseh osem v vsaki mreži |
 
-- Prekrivanje šteje vsako ponovno uporabo črke na že zasedenem polju. Enoličnost velja v vseh osmih smereh, igralec pa sme označiti oba konca v kateremkoli vrstnem redu.
-- Model generatorja ločeno določa velikost, število in dolžino besed, dovoljene smeri, ciljno prekrivanje in polnilo. Začetna in lahka imata enakomerno polnilo, srednja uporabi pogostost črk iz besednega nabora.
-- Težka, zelo težka in ultra težka so predvidene po igralnem preizkusu prvih treh stopenj. Ročna izbira osi in tematski slovarji so prihodnje možnosti.
-- Slovenske besede in šumniki, brez nesmiselnih seznamov.
-- Označevanje z miško, dotikom in tipkovnico. Najdene besede so zelene s kljukico na seznamu, napačna izbira rdeča z besedilom, namig oranžen z besedilom.
-- Težavnost ni zgolj velikost; povezana je tudi s prekrivanji, dolžinami, smermi, podobnostjo besed.
+- »Po meri« ima velikosti 6, 8, 10 in 12, izbiro 2, 4 ali 8 smeri, število od 3 do 14 in štiri ločene zahtevnosti. Zahtevnost prilagaja dolžino in podobnost besed, težo prekrivanj in porazdelitev črk v polnilu. Predolga beseda je izključena iz nabora, omejitev števila besed pa je navedena ob polju.
+- Slovensko besedišče vključuje Č, Š in Ž. Deterministični generator preveri, da se vsaka ciljna beseda pojavi natanko enkrat v vseh osmih smereh. Beseda je neprekinjena ravna črta. Na voljo sta oba vrstna reda označitve končnih črk. Generiranje ima omejeno število poskusov in ob neuspehu izpiše razlog.
+- Dotik uporablja dve končni črki in dopušča navpično drsenje. Na namizju delujeta vlečenje ter pomikanje s puščicami in označevanje z Enter. Kljukica in prečrtanje ločita najdene besede. Dva namiga na sejo lahko povesta zgolj orientacijo ene še iskane besede, dokler sta vsaj dve nenajdeni.
 
 ## Sudoku
 - 4×4, 6×6 in 9×9 s pravilnimi regijami.
@@ -26,11 +22,10 @@ Vsaka uganka ima stabilen `puzzleId`, revizijo, vrsto, nastavitve, definicijo in
 - Tipkovnica, dotik in razumljivi namigi brez samodejnega razkritja rešitve.
 
 ## Labirint
-- Prikazne mreže 13 × 13, 21 × 21, 33 × 33, 45 × 45 in 61 × 61. Velikost in težavnost (Lahka, Srednja, Zahtevna) sta neodvisni. Privzeto 13 × 13 in Lahka.
-- Generator revizije 1 izdela zvezno drevo z eno potjo do cilja. BFS preveri pot ter izmeri njeno dolžino, ovinke, razpotja na poti, slepe konce in največjo globino napačne veje.
-- Growing Tree primerja 15 kandidatov, po tri za vsako od petih verjetnosti izbire najnovejše aktivne celice. Prednost imajo poti dolžine vsaj 1,15-krat najkrajše geometrijske razdalje in z vsaj štirimi ovinki oziroma polovico logične širine, če je ta večja. Če se uvrstijo manj kot trije kandidati, se uporabijo vsi preverjeni kandidati. Dodatnih poskusov ni.
-- Znotraj istega semena in velikosti se stopnje določijo z najnižjo, srednjo in najvišjo oceno v skupini. Ocena je vsota dolžine poti, dveh točk na ovinek, šestih na razpotje in največje globine napačne veje, deljena z logično širino. Posamezne meritve se med stopnjami lahko prekrivajo.
-- Premik je omejen na eno odprto sosednje polje. Ohranjen je zadnji veljavni položaj pri zdrsu ali izgubi kazalca. Na voljo so tipkovnica, klik, dotik, vlečenje in smerni gumbi.
+
+- Mreže 13 × 13, 21 × 21, 33 × 33, 45 × 45 in 61 × 61. Velikost in težavnost (Lahka, Srednja, Zahtevna) sta neodvisni. Privzeto 13 × 13 in Lahka.
+- Generator R4 uporabi naključno razvrščene povezave in Kruskalov algoritem. Preverjevalnik potrdi povezljivost in enolično pot do cilja. Generator primerja do 15 kandidatov in izbere spodnjo, srednjo ali zgornjo oceno. Ocena vključuje dolžino poti, zavoje, razpotja, slepe veje in največjo globino napačnega odcepa. Posamezne meritve se med stopnjami lahko prekrivajo.
+- Celotna mreža je prikazana v enem SVG-ju. Premik dovoljuje le odprto sosednje polje. Krmiljenje vključuje analogno palico s štirimi smermi in ponavljanjem, puščice, W, A, S, D, smerne gumbe in klik soseda. Namig pove samo naslednjo smer.
 
 ## Križanka
 - Cilj je **prava skandinavska križanka**: opisi v celicah mreže, puščice, gosta in smiselna križanja.
