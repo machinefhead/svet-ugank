@@ -190,7 +190,6 @@ h1, h2 { font-family: var(--heading); font-weight: 400; margin: 0; }
 .card-arrow { position: absolute; top: 19px; right: 19px; color: var(--muted); }
 
 .play { padding-block: 27px 52px; }
-.play-nav { display: flex; flex-wrap: wrap; gap: 22px; }
 .back-link { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; color: var(--accent); text-decoration: none; font-weight: 700; }
 .back-link:hover { text-decoration: underline; }
 .play-header { width: 100%; max-width: 955px; margin: 21px auto 23px; }
@@ -207,12 +206,6 @@ h1, h2 { font-family: var(--heading); font-weight: 400; margin: 0; }
 .board-panel, .play-options { padding: clamp(13px, 3vw, 27px); background: var(--paper); border: 1px solid var(--line); border-radius: 18px; }
 .play-options { display: grid; gap: 8px; padding-block: 13px; }
 .play-options h2 { font-size: 1.35rem; }
-.toolbar-row, .toolbar-fields, .toolbar-actions { display: flex; flex-wrap: wrap; align-items: end; gap: 7px 12px; }
-.toolbar-row { justify-content: space-between; }
-.toolbar-fields label { display: grid; gap: 3px; }
-.toolbar-actions .button { min-height: 44px; padding: 6px 12px; }
-.play-options label, .applied-difficulty { font-size: .875rem; color: var(--muted); }
-.applied-difficulty { margin: 0; }
 .board { width: 100%; max-width: 490px; table-layout: fixed; margin-inline: auto; border-collapse: collapse; }
 .board td { aspect-ratio: 1; text-align: center; vertical-align: middle; padding: 0; }
 .board td {
@@ -384,38 +377,7 @@ button:disabled { cursor: default; opacity: .62; }
 }
 .solution-word button[aria-pressed="true"] { background: var(--lavender); color: var(--tile-ink); }
 
-.profile-panel {
-  max-width: 640px;
-  margin-block: 0 32px;
-  padding: clamp(14px, 2.5vw, 22px);
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-}
-.profile-panel h2 { font-size: 1.5rem; }
-.profile-panel p, .profile-panel label { color: var(--muted); }
-.profile-panel p:empty { display: none; }
-.profile-edit { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 6px; }
-.profile-edit input {
-  min-height: 44px;
-  min-width: 0;
-  width: min(100%, 14rem);
-  font: inherit;
-  padding: 8px 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--bg);
-  color: var(--ink);
-}
-.result-table { width: 100%; border-collapse: collapse; text-align: left; font-size: .875rem; }
-.result-table:not(:first-child) { margin-top: 12px; }
-.profile-panel summary { cursor: pointer; font-weight: 650; }
-.result-details, .legacy-results { margin-top: 12px; }
-.result-table caption { text-align: left; font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
-.result-table :is(th, td) { border-bottom: 1px solid var(--line); padding: 6px 4px; }
-.recent-results { padding-inline-start: 1.2rem; }
-.recent-results li { margin-block: 4px; }
-.result-note, .storage-notice { font-size: .875rem; }
+.storage-notice { font-size: .875rem; }
 .storage-notice { padding: 12px; margin-block: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
 
 @media (max-width: 900px) {
@@ -460,8 +422,6 @@ button:disabled { cursor: default; opacity: .62; }
   .maze-viewport { max-width: none; }
   .maze-viewport.enlarged { max-width: none; }
   .maze-controls { justify-content: center; }
-  .toolbar-fields label { min-width: min(100%, 8rem); flex: 1; }
-  .toolbar-fields label select { width: 100%; }
 }
 
 .maze-solution-banner {
@@ -471,3 +431,20 @@ button:disabled { cursor: default; opacity: .62; }
   line-height: 1.45;
   color: var(--ink);
 }
+
+.games h2 { margin: 0 0 12px; font-size: 1.35rem; }
+.coming-games { margin-top: 32px; }
+.coming-games p { margin: -5px 0 12px; color: var(--muted); }
+.coming-list { display: flex; flex-wrap: wrap; gap: 9px; margin: 0; padding: 0; list-style: none; }
+.coming-card { padding: 12px 15px; border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); }
+.play-actions:has([hidden]) { display: none; }
+.play-options { gap: 12px; }
+.play-options p { margin: 0; color: var(--muted); }
+.play-options p:empty { display: none; }
+.play-options #setup-error { color: var(--error-ink); margin-bottom: 12px; }
+#game-form { display: grid; gap: 12px; justify-items: start; }
+#game-fields { display: grid; gap: 12px; width: 100%; }
+#game-fields label { display: grid; gap: 4px; font-weight: 650; }
+#game-fields select { width: 100%; min-height: 44px; }
+#resume-game { justify-self: start; }
+.game-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 18px; }

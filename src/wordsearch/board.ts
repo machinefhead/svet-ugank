@@ -212,8 +212,7 @@ export function mountBoard(panel: HTMLElement, puzzle: Puzzle, onLine: (from: nu
     instructions.hidden = locked
     exit.hidden = !viewing
     progress.textContent = viewing ? 'Rešitev · izberi besedo za prikaz njene poti.' :
-      `Najdene besede: ${play.found.length} / ${puzzle.placements.length}.` +
-      (play.revealed ? ' Rešitev je bila prikazana. Ta uganka se ne šteje med rezultate.' : '')
+      `Najdene besede: ${play.found.length} / ${puzzle.placements.length}.`
   }
 
   exit.addEventListener('click', () => {

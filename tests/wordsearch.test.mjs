@@ -4,7 +4,7 @@ import { findWord, isComplete, lineBetween } from '../src/wordsearch/checker.ts'
 import { generateGrid, generatePuzzle } from '../src/wordsearch/generator.ts'
 import { alphabet, words } from '../src/wordsearch/words.ts'
 import { directions, presets } from '../src/wordsearch/model.ts'
-import { recordResult, selectWord, startPuzzle, useHint } from '../src/wordsearch/session.ts'
+import { selectWord, startPuzzle, useHint } from '../src/wordsearch/session.ts'
 
 test('101 seeds per level respect the preset, return unique answers, and vary layouts', (t) => {
   for (const [level, preset] of Object.entries(presets)) {
@@ -116,7 +116,7 @@ test('invalid settings and selections are rejected, including row wrap', () => {
   assert.equal(findWord(puzzle, 1, 1), undefined)
 })
 
-test('every word must be found; repeated selections or completion cannot award twice', () => {
+test('every word must be found; repeated selections or completion cannot change progress', () => {
   const puzzle = generatePuzzle('medium', 314)
   let play = startPuzzle('medium', 314, 100)
   play = useHint(puzzle, play)
@@ -127,7 +127,6 @@ test('every word must be found; repeated selections or completion cannot award t
   assert.equal(selectWord(puzzle, play, 0, 12).status, 'invalid')
   for (const [index, { cells }] of puzzle.placements.entries()) {
     assert.equal(isComplete(puzzle, play.found), false)
-    assert.deepEqual(recordResult([], puzzle, play, 650), [])
     const move = selectWord(puzzle, play, cells.at(-1), cells[0])
     play = move.play
     const complete = index === puzzle.placements.length - 1
@@ -136,9 +135,4 @@ test('every word must be found; repeated selections or completion cannot award t
     assert.equal(repeat.status, complete ? 'closed' : 'already-found')
     assert.equal(repeat.play, play)
   }
-  const results = recordResult([], puzzle, play, 650)
-  assert.deepEqual(results, [{ puzzleId: puzzle.id, revision: 2, level: 'medium', elapsedMs: 550, hints: 2, finishedAt: 650 }])
-  assert.equal(recordResult(results, puzzle, play, 777), results)
-  assert.deepEqual(recordResult([], puzzle, { ...play, revealed: true }, 650), [])
-  assert.equal(selectWord(puzzle, { ...play, revealed: true, found: [] }, 0, 9).status, 'closed')
 })

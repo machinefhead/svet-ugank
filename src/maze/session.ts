@@ -1,4 +1,4 @@
-import type { MazeConfig, MazePuzzle } from './model.ts'
+import type { MazePuzzle } from './model.ts'
 import { canMove, solveMaze } from './solver.ts'
 
 export interface MazePlay {
@@ -9,15 +9,6 @@ export interface MazePlay {
   startedAt: number
   finishedAt: number | null
   revealed: boolean
-}
-
-export interface MazeResult {
-  puzzleId: string
-  config: MazeConfig
-  elapsedMs: number
-  finishedAt: number
-  steps: number
-  hints: number
 }
 
 export function startMaze(puzzle: MazePuzzle, now: number): MazePlay {
@@ -44,11 +35,4 @@ export function hintMaze(puzzle: MazePuzzle, play: MazePlay) {
   if (play.finishedAt !== null) return null
   const next = solveMaze(puzzle, play.position, puzzle.goal)[1]
   return next === undefined ? null : { next, play: { ...play, hints: play.hints + 1 } }
-}
-
-export function recordMazeResult(results: readonly MazeResult[], puzzle: MazePuzzle, play: MazePlay) {
-  if (play.revealed || play.finishedAt === null || play.position !== puzzle.goal ||
-    results.some(({ puzzleId }) => puzzleId === puzzle.puzzleId)) return results
-  return [...results, { puzzleId: puzzle.puzzleId, config: puzzle.config, finishedAt: play.finishedAt,
-    elapsedMs: play.finishedAt - play.startedAt, steps: play.steps, hints: play.hints }]
 }
