@@ -215,9 +215,6 @@ h1, h2 { font-family: var(--heading); font-weight: 400; margin: 0; }
   font-size: clamp(.9rem, 2.7vw, 1.35rem);
   font-weight: 650;
 }
-.word-list .found, .letter-grid .found { background: var(--tile); color: var(--tile-ink); }
-.word-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 0; margin: 8px 0 0; list-style: none; }
-.word-list li { padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; font-size: .8rem; font-weight: 700; }
 .sudoku-board { border: 2px solid var(--muted); }
 .sudoku-board td:nth-child(3n) { border-right: 2px solid var(--muted); }
 .sudoku-board tr:nth-child(3n) td { border-bottom: 2px solid var(--muted); }
@@ -227,116 +224,6 @@ h1, h2 { font-family: var(--heading); font-weight: 400; margin: 0; }
 .clue span { display: block; font-size: 1.15rem; }
 .cross-block { background: var(--action); }
 
-.maze-grid {
-  display: block;
-  width: 100%;
-  max-width: 620px;
-  height: auto;
-  margin-inline: auto;
-  user-select: none;
-}
-.maze-wall { fill: var(--action); }
-.maze-floor { fill: var(--bg); }
-.maze-trail { fill: color-mix(in srgb, var(--bg) 80%, var(--accent)); }
-.maze-start { fill: var(--accent); }
-.maze-goal { fill: var(--success-ink); }
-.maze-player { fill: var(--ink); stroke: var(--paper); stroke-width: .14; }
-.maze-solution {
-  fill: none;
-  stroke: var(--warning-ink);
-  stroke-width: .48;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.maze-controls { display: grid; justify-items: center; gap: 12px; margin-top: 16px; }
-.joystick {
-  display: grid;
-  place-items: center;
-  width: 108px;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: 2px solid var(--line);
-  background: var(--bg);
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
-}
-.joystick-thumb {
-  width: 44%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: var(--action);
-  pointer-events: none;
-}
-.maze-directions { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
-.maze-directions .button { width: 48px; padding: 0; font-size: 1.35rem; }
-.maze-directions .button[aria-disabled="true"] { opacity: .62; }
-
-dialog {
-  width: min(calc(100% - 32px), 414px);
-  padding: 0;
-  border: 1px solid var(--line);
-  border-radius: 23px;
-  background: var(--paper);
-  color: var(--ink);
-  box-shadow: 0 20px 75px #15101f52;
-}
-dialog::backdrop { background: #1e132c9e; }
-.congratulations { padding: 32px 24px; text-align: center; }
-.celebration {
-  display: grid;
-  place-items: center;
-  width: 70px;
-  aspect-ratio: 1;
-  margin: 0 auto 14px;
-  border-radius: 22px;
-  background: var(--lavender);
-  color: var(--tile-ink);
-  font-size: 2.6rem;
-}
-.congratulations h2 { font-size: 3rem; }
-.congratulations p { margin: 8px 0 24px; color: var(--muted); }
-.confirmation h2 { font-size: 2rem; }
-.dialog-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
-button:disabled { cursor: default; opacity: .62; }
-
-.board-instructions, .board-feedback { color: var(--muted); }
-.board-instructions { max-width: 490px; margin: 12px auto 0; font-size: .875rem; }
-.board-feedback { max-width: 490px; margin: 14px auto 0; font-size: .875rem; }
-.board-feedback p { margin: 0 0 6px; min-height: 1.2em; }
-.letter-grid {
-  max-width: 490px;
-  margin-inline: auto;
-  border: 1px solid var(--line);
-  touch-action: pan-y pinch-zoom;
-  user-select: none;
-}
-.letter-grid [role="row"] { display: grid; grid-template-columns: repeat(var(--size), minmax(0, 1fr)); }
-.letter-grid button {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  aspect-ratio: 1;
-  padding: 0;
-  border: 1px solid var(--line);
-  background: var(--paper);
-  color: var(--ink);
-  font-size: clamp(.87rem, 2.8vw, 1.3rem);
-  font-weight: 700;
-}
-.letter-grid button:focus-visible { position: relative; z-index: 1; outline-offset: -2px; }
-.word-list .found { text-decoration: line-through; }
-.word-list .solution, [data-game="wordsearch"] .letter-grid .solution { background: var(--lavender); color: var(--tile-ink); }
-[data-game="wordsearch"] .letter-grid .found.solution { box-shadow: inset 0 0 0 2px var(--success-ink); }
-[data-game="wordsearch"] :is(.word-list, .letter-grid) .found {
-  background: var(--success-fill);
-  color: var(--success-ink);
-}
-[data-game="wordsearch"] .letter-grid .selected { background: var(--action); color: var(--on-action); }
-.letter-grid .invalid { box-shadow: inset 0 0 0 2px var(--error-ink); }
-.board-message[data-tone="success"] { color: var(--success-ink); }
-.board-message[data-tone="error"] { color: var(--error-ink); }
-.board-message[data-tone="warning"] { color: var(--warning-ink); }
 .storage-notice { font-size: .875rem; }
 .storage-notice { padding: 12px; margin-block: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
 
@@ -360,9 +247,6 @@ button:disabled { cursor: default; opacity: .62; }
 @media (max-width: 355px) {
   .theme-label { position: absolute; clip-path: inset(50%); }
   .game-list { grid-template-columns: 1fr; }
-  main.wrap:has(#play[data-game="wordsearch"]:not([hidden])) { width: calc(100% - 16px); }
-  [data-game="wordsearch"] .board-panel { padding-inline: 6px; }
-  .board-instructions, .board-feedback { padding-inline: 6px; }
 }
 
 /* Shared, centered puzzle shell across desktop and phone. */
@@ -386,18 +270,6 @@ button:disabled { cursor: default; opacity: .62; }
 .coming-games p { margin: -5px 0 12px; color: var(--muted); }
 .coming-list { display: flex; flex-wrap: wrap; gap: 9px; margin: 0; padding: 0; list-style: none; }
 .coming-card { padding: 12px 15px; border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); }
-.play-actions:has([hidden]) { display: none; }
 .play-options { gap: 12px; }
 .play-options p { margin: 0; color: var(--muted); }
 .play-options p:empty { display: none; }
-.play-options #setup-error { color: var(--error-ink); margin-bottom: 12px; }
-#game-form { display: grid; gap: 12px; justify-items: start; }
-#game-fields { display: grid; gap: 12px; width: 100%; }
-#game-fields label { display: grid; gap: 4px; font-weight: 650; }
-#game-fields select { width: 100%; min-height: 44px; }
-#resume-game { justify-self: start; }
-.game-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 18px; }
-
-.word-list-title { margin: 16px auto 0; text-align: center; font-size: 1.1rem; }
-.settings-fields { display: grid; gap: 10px; }
-.play-options .field-error { color: var(--error-ink); }

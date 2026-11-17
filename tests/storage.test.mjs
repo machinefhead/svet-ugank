@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { isTheme, openSlot, readLegacy, savedGameNotice } from '../src/storage.ts'
+import { isTheme, openSlot, readLegacy } from '../src/storage.ts'
 
 function memoryStorage(entries) {
   const data = new Map(entries)
@@ -15,7 +15,7 @@ test('theme is carried into a new key, and legacy, other-site and profile data r
   const storage = memoryStorage([['svet-ugank:r2', old], ['svet-ugank:maze', oldMaze], ['other', 'data']])
   const getStorage = () => storage
   const theme = openSlot(getStorage, 'theme', decodeTheme)
-  assert.ok(savedGameNotice(false, false, Boolean(readLegacy(getStorage, 'svet-ugank:r2', 'play'))))
+  assert.ok(readLegacy(getStorage, 'svet-ugank:r2', 'play'))
   assert.equal(theme.save(decodeTheme(readLegacy(getStorage, 'svet-ugank:r2', 'theme'))), true)
   assert.equal(openSlot(getStorage, 'theme', decodeTheme).value, 'dark')
   assert.deepEqual([...storage.data], [
@@ -32,7 +32,7 @@ test('corrupt data has a notice, future data is protected and blocked storage ke
   const getStorage = () => storage
   const corrupt = openSlot(getStorage, 'theme', decodeTheme)
   assert.equal(corrupt.value, null)
-  assert.ok(savedGameNotice(corrupt.invalid, false, false))
+  assert.equal(corrupt.invalid, true)
   assert.equal(corrupt.save('light'), true)
   assert.equal(openSlot(getStorage, 'theme', decodeTheme).value, 'light')
   const future = '{"version":999,"value":"dark"}'

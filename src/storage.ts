@@ -16,7 +16,6 @@ export function readLegacy(getStore: GetStore, key: 'svet-ugank:r2' | 'svet-ugan
     return null
   }
 }
-
 export function openSlot<T>(getStore: GetStore, name: string, decode: (value: unknown) => T | null, encode: (value: T) => unknown = (value) => value) {
   const key = 'svet-ugank:r4:' + name
   const version = 1
@@ -61,10 +60,4 @@ export function openSlot<T>(getStore: GetStore, name: string, decode: (value: un
       return available
     },
   }
-}
-
-export function savedGameNotice(invalid: boolean, hasSession: boolean, hasLegacy: boolean) {
-  if (invalid) return 'Shranjene uganke ni bilo mogoče obnoviti. Začni novo igro.'
-  if (!hasSession && hasLegacy) return 'Prejšnja uganka je iz stare različice. Za igranje začni novo igro.'
-  return ''
 }

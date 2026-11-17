@@ -1,36 +1,30 @@
 # Svet ugank
 
-Slovenska spletna igralnica za otroke in odrasle. Začetni razvoj: **Osmosmerka, Križanka, Sudoku, Labirint**.
+Slovenska spletna igralnica v razvoju. Predvidene prve vrste so Osmosmerka, Skandinavska križanka, Sudoku in Labirint.
 
-**R4 za pregled.** Osmosmerka in Labirint sta igralna. Skandinavska križanka in Sudoku sta vzorčna prikaza DEMO v pripravi. Katalog napoveduje tri prihodnje igre za več igralcev.
+## Trenutno stanje razvojne veje R4
+
+**Razvoj Osmosmerke in Labirinta je na izrecno željo lastnika ustavljen.** Njuni implementaciji (generatorji, seje, igralna polja, upravljanje in testi) sta odstranjeni iz te razvojne veje. V katalogu ostajata označeni **V prenovi**, vendar ju ni mogoče igrati. Naslednja zasnova še ni dogovorjena; ne začni ju samodejno znova implementirati.
+
+Sudoku in Skandinavska križanka sta še vedno samo statična prikaza **DEMO**. Razdelek **Za dva ali več igralcev** vsebuje zgolj neaktivne napovedi Križec-krožec, Štiri v vrsto in Zračni hokej.
+
+Ohranjeni so naslovnica, izbor iger, svetla/temna/sistemska tema in demonstracijska prikaza. Vmesnik nima lokalnega vzdevka in osebnih rezultatov. Obstoječi stari podatki v brskalnikovi shrambi niso izbrisani, vendar jih stran ne prikazuje.
 
 ## Lokalni zagon
 
-Uporabi Node.js 24. Namesti odvisnosti z `npm ci`, nato uporabi `npm run dev` in odpri naslov, ki ga izpiše Vite. Teste poženeš z `npm test`, produkcijski predogled pa z `npm run build` in `npm run preview`.
+V projektni mapi z ustreznim Node.js zaženi:
 
-Na naslovnici izberi »Začni igrati«, nato igro. Na začetnem zaslonu izberi nastavitve in pritisni »Začni igro«. Če imaš nedokončano igro, jo odpre »Nadaljuj« z isto mrežo in napredkom. »Nova uganka« vrne na nastavitve. Napredek zamenjaš šele, ko potrdiš nov začetek.
+```sh
+npm ci
+npm run dev
+```
 
-V Osmosmerki izberi »Klasična« ali »Po meri«. Na telefonu se dotakni prve in zadnje črke. V Labirintu uporabi palico pod mrežo, smerne gumbe ali na fokusirani mreži puščice oziroma W, A, S, D. Gumba za namig in potrjen ogled rešitve sta na dnu igre.
+Za preverjanje ostalega ogrodja: `npm test` in `npm run build`.
 
-Tema ter napredek R4 se shranita v verzionirane ključe `svet-ugank:r4:*`. Iz stare shrambe se prenese tema. Ob stari nezdružljivi uganki začetni zaslon predlaga nov začetek. Zapisa R2 in R3 ostaneta v brskalniku kot zgodovinska podatka.
+Vite uporablja osnovno pot `/svet-ugank/`. Razvojna veja ni javna objava. Javni GitHub Pages se posodobi šele po izrecno odobreni združitvi v `main`.
 
-Gradnja uporablja pot `/svet-ugank/`. Postopek prve objave po potrjeni združitvi in nastavitev Pages sta v [navodilih za GitHub](09_GITHUB_SETUP.md). Lokalni napredek z localhosta na github.io ne preide samodejno.
+## Projektni dokumenti
 
-## Začni tukaj
-1. [00_START_HERE.md](00_START_HERE.md) — aktualno stanje in omejitve
-2. [08_DECISIONS.md](08_DECISIONS.md) — potrjene odločitve
-3. [01_PRODUCT_SPEC.md](01_PRODUCT_SPEC.md) — namen in obseg
-4. [02_GAME_REQUIREMENTS.md](02_GAME_REQUIREMENTS.md) — merila štirih ugank
-5. [03_UI_UX.md](03_UI_UX.md) — izkušnja in oblikovanje
-6. [04_PROFILES_OFFLINE_SYNC.md](04_PROFILES_OFFLINE_SYNC.md) — lokalni napredek in prihodnji računi
-7. [05_ARCHITECTURE.md](05_ARCHITECTURE.md) — modularna zasnova
-8. [06_ROADMAP.md](06_ROADMAP.md) — zaporedje razvoja
-9. [07_QA_ACCEPTANCE.md](07_QA_ACCEPTANCE.md) — preverjanje kakovosti
-10. [09_GITHUB_SETUP.md](09_GITHUB_SETUP.md) — proces dela
-11. [AGENTS.md](AGENTS.md) — navodila za Codex
+Izhodišča so v `00_START_HERE.md`, `01_PRODUCT_SPEC.md`, `02_GAME_REQUIREMENTS.md`, `03_UI_UX.md`, `05_ARCHITECTURE.md`, `06_ROADMAP.md` in `08_DECISIONS.md`. Stari zapisi o izvedbah R2–R4 so zgodovina razvoja, ne opis trenutnih delujočih iger. Prototip V3 ostaja referenca in ni potrjena produkcijska osnova.
 
-Orodja, modele in pripravo nalog opisuje [docs/CODEX_WORKFLOW.md](docs/CODEX_WORKFLOW.md).
-
-**Referenčni prototip V3:** ostaja v arhivu ChatGPT Project (paket `SvetUgank_START_2026-11-15.zip`). Ni potrjena produkcijska osnova in ga trenutno ne kopiramo v `main`. Če ga Codex potrebuje za inventuro, mora biti dejansko priložen njegovemu delovnemu okolju.
-
-Nobenih sprememb javnega gostovanja ali drugih repozitorijev brez izrecne odobritve lastnika.
+**Do naslednjih lastnikovih navodil ne dodajaj novega generatorja, igralne mehanike ali nove vrste igre.**

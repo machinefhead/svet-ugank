@@ -77,18 +77,10 @@
           </div>
         </div>
         <div class="play-layout">
-          <section class="play-options" id="game-setup" aria-labelledby="setup-title">
-            <h2 id="setup-title">Nastavitve igre</h2>
+          <section class="play-options" aria-labelledby="setup-title">
+            <h2 id="setup-title">V pripravi</h2>
             <p id="setup-message"></p>
-            <p id="session-notice" role="status"></p>
-            <button class="button secondary" id="resume-game" type="button" hidden>Nadaljuj</button>
-            <form id="game-form">
-              <div id="game-fields"></div>
-              <p id="setup-error" role="alert"></p>
-              <button class="button primary" id="start-game" type="submit">Začni igro</button>
-            </form>
           </section>
-          <div class="play-actions"><button class="button secondary" id="new-puzzle" type="button" hidden>Nova uganka</button></div>
           <div class="board-panel" id="board-panel" hidden></div>
         </div>
       </section>
@@ -96,24 +88,6 @@
 
     <p class="storage-notice wrap" id="storage-notice" role="status" hidden>Lokalno shranjevanje ni na voljo. Spremembe lahko izgubiš, ko zapreš ali osvežiš stran.</p>
 
-    <dialog id="congratulations" aria-labelledby="congratulations-title" aria-describedby="congratulations-text">
-      <form method="dialog" class="congratulations">
-        <span class="celebration" aria-hidden="true">✦</span>
-        <h2 id="congratulations-title">Bravo!</h2>
-        <p id="congratulations-text">Uspešno si rešil uganko.</p>
-        <button class="button primary" autofocus>Nazaj k uganki</button>
-      </form>
-    </dialog>
-    <dialog id="confirm" aria-labelledby="confirm-title" aria-describedby="confirm-text">
-      <form method="dialog" class="congratulations confirmation">
-        <h2 id="confirm-title"></h2>
-        <p id="confirm-text"></p>
-        <div class="dialog-actions">
-          <button class="button secondary" value="cancel" autofocus>Prekliči</button>
-          <button class="button primary" id="confirm-action" value="accept"></button>
-        </div>
-      </form>
-    </dialog>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

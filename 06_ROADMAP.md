@@ -8,6 +8,7 @@
 - **R3 – Kakovost štirih iger:** osmosmerka, sudoku, labirint, prava skandinavska križanka; vsako posebej s preizkusi in pregledom.
   - **R3 / Naloga 06 za pregled:** igralni Labirint z lokalnim napredkom, skupne kontrole nad mrežo in priprava GitHub Pages. Sledi igralni pregled težavnosti in dotika na fizičnem telefonu ter potrjena združitev. Sudoku in Skandinavska križanka ostajata DEMO.
 - **R4 – Začetni zasloni in ponovni razvoj:** nova Osmosmerka in Labirint, nastavitve pred začetkom, lokalna nedokončana seja in odstranitev vidnega profila z osebnimi rezultati. Sudoku in Skandinavska križanka ostajata DEMO. Sledi fizični pregled na Samsung/Androidu.
+  - **Sprememba 17. 11. 2026:** lastnik je obe izvedbi zavrnil in naročil odstranitev iz razvojne veje. Njuna nova zasnova čaka na njegove naslednje zahteve; ne nadaljuj avtomatsko po starem načrtu.
 - **Po R4 – Offline:** PWA in preneseni paketi s preverjanjem na pravem telefonu.
 - **R5 – Zasebno/javno testiranje:** uporabnost, odprava napak, pregled zasebnosti ter zbiranje neinvazivnih agregiranih odzivov.
 - **Kasneje:** pravi spletni računi, sinhronizacija in skupne lestvice; PDF/tisk, nove vrste, trgovina.

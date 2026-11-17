@@ -60,3 +60,9 @@ Novih odločitev ni dovoljeno prikrito izvajati kot že potrjenih.
 - Lokalni vzdevek, časi in zgodovina osebnih rezultatov so za to fazo odstranjeni iz vmesnika in shranjevanja. Stari ključi ostanejo v brskalniku. R4 prenese temo, vodi nove seje pod ločenimi ključi in ob nezdružljivi stari uganki ponudi nov začetek. O profilih in računih se lahko znova odloča kasneje.
 - Ogled rešitve je začasen in ohrani napredek. Čestitka ob dokončanju ostane.
 - R4 se preda kot Draft PR iz nove veje na osnovi osveženega main. PR #6 ostane ločen, pregled in morebitno združitev izvede lastnik.
+
+## Nova odločitev 17. 11. 2026 — ustavitev obeh izvedb R4
+
+- Lastnik je zavrnil trenutno Osmosmerko in Labirint ter izrecno naročil odstranitev **obeh implementacij**, preden pove, kako nadaljevati. Ta odločitev je novejša od zgornjega opisa R4.
+- Na razvojni veji R4 ni več igralnih modulov za ti dve vrsti, vključujoč generatorje, preverjanje, prikaza in krmiljenje. V katalogu ostaneta neaktivni oznaki »V prenovi«. Sudoku in Skandinavska križanka sta še naprej DEMO.
+- Ohrani obstoječo naslovnico, temo in napoved večigralskih iger. Starih brskalniških podatkov ne briši. Nova zasnova obeh iger čaka na navodila; brez samodejne implementacije ali združitve v `main`.

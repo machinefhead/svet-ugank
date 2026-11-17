@@ -1,5 +1,7 @@
 # 07 — QA in sprejemna merila
 
+**Opomba 17. 11. 2026:** Spodnji igralni kriteriji so zgodovinski oziroma prihodnji. Osmosmerka in Labirint sta trenutno odstranjena iz razvojne veje R4 do novih navodil. Testi teh izvedb niso več del aktivne kode; preverjamo le skupno ogrodje in temo.
+
 - Vsaka objavljena uganka ima veljavno rešitev; sudoku zahteva enoličnost.
 - Generatorji: deterministični testi po semenih in več deset/stotine primerov na težavnost, če je relevantno.
 - Vsaka težavnost pomeni merljivo razliko, ne samo velikosti mreže.
