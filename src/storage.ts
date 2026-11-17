@@ -17,7 +17,7 @@ export function readLegacy(getStore: GetStore, key: string) {
   }
 }
 
-export function openSlot<T>(getStore: GetStore, name: string, decode: (value: unknown) => T | null) {
+export function openSlot<T>(getStore: GetStore, name: string, decode: (value: unknown) => T | null, encode: (value: T) => unknown = (value) => value) {
   const key = 'svet-ugank:r4:' + name
   const version = 1
   let value: T | null = null
@@ -55,7 +55,7 @@ export function openSlot<T>(getStore: GetStore, name: string, decode: (value: un
       invalid = false
       if (!future) {
         try {
-          getStore().setItem(key, JSON.stringify({ version, value: next }))
+          getStore().setItem(key, JSON.stringify({ version, value: encode(next) }))
           available = true
         } catch {
           available = false

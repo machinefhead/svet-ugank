@@ -1,6 +1,7 @@
 import './styles.css'
 import { examples, renderDemo, type Game } from './examples.ts'
 import type { GameController, GameUI } from './game-ui.ts'
+import { setupWordsearch } from './wordsearch/game.ts'
 import { isTheme, openSlot, readLegacy } from './storage.ts'
 
 const element = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T
@@ -57,7 +58,7 @@ confirmation.addEventListener('close', () => {
   if (confirmation.returnValue === 'accept') run?.()
 })
 
-const controllers: Partial<Record<Game, GameController>> = {}
+const controllers: Partial<Record<Game, GameController>> = { wordsearch: setupWordsearch(getStorage, ui) }
 const routes: Record<Game, string> = {
   wordsearch: 'osmosmerka', crossword: 'krizanka', sudoku: 'sudoku', maze: 'labirint',
 }

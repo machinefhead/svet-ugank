@@ -1,24 +1,56 @@
-import { findWord, isComplete } from './checker.ts'
-import { hintLimit, puzzleId, revision, type Level, type PlayState, type Puzzle, type PuzzleLevel, type Revision, type WordsearchOptions } from './model.ts'
+import { isSeed } from '../random.ts'
+import { record } from '../storage.ts'
+import { findWord } from './checker.ts'
+import { isConfig } from './config.ts'
+import { generatePuzzle } from './generator.ts'
+import { hintLimit, revision, type Puzzle } from './model.ts'
 
-export function startPuzzle(level: Level, seed: number, now: number, options?: WordsearchOptions): PlayState {
-  return { revision, level, seed, startedAt: now, found: [], hints: [], revealed: false,
-    ...(options ? { options: { ...options } } : {}) }
+export interface PlayState {
+  readonly found: readonly string[]
+  readonly hinted: readonly string[]
 }
 
-export function selectWord(puzzle: Puzzle, play: PlayState, from: number, to: number) {
-  if (puzzle.id !== puzzleId(play.level, play.seed, play.revision, play.options) || play.revealed || isComplete(puzzle, play.found)) {
-    return { play, status: 'closed' as const }
-  }
-  const word = findWord(puzzle, from, to)
-  if (!word) return { play, status: 'invalid' as const }
-  if (play.found.includes(word)) return { play, status: 'already-found' as const, word }
-  const next = { ...play, found: [...play.found, word] }
-  return { play: next, status: isComplete(puzzle, next.found) ? 'complete' as const : 'found' as const, word }
+export interface Session {
+  readonly puzzle: Puzzle
+  readonly play: PlayState
 }
 
-export function useHint(puzzle: Puzzle, play: PlayState): PlayState {
-  if (play.revealed || play.hints.length >= hintLimit || puzzle.id !== puzzleId(play.level, play.seed, play.revision, play.options)) return play
-  const next = puzzle.placements.find(({ word }) => !play.found.includes(word) && !play.hints.includes(word))
-  return next ? { ...play, hints: [...play.hints, next.word] } : play
+export const complete = ({ puzzle, play }: Session) => play.found.length === puzzle.placements.length
+
+export function selectWord(session: Session, from: number, to: number) {
+  if (complete(session)) return { status: 'closed' as const }
+  const word = findWord(session.puzzle, from, to)
+  if (!word) return { status: 'invalid' as const }
+  if (session.play.found.includes(word)) return { status: 'already-found' as const, word }
+  return { status: 'found' as const, word, play: { ...session.play, found: [...session.play.found, word] } }
+}
+
+const orientations = ['vodoravno', 'navpično', 'poševno', 'poševno', 'vodoravno', 'navpično', 'poševno', 'poševno']
+
+export function nextHint({ puzzle, play }: Session) {
+  if (play.hinted.length >= hintLimit) return
+  const missing = puzzle.placements.filter(({ word }) => !play.found.includes(word))
+  const target = missing.find(({ word }) => !play.hinted.includes(word))
+  if (!target) return
+  const orientation = orientations[target.direction]
+  // When only one word remains, withhold the hint rather than identify its orientation.
+  if (missing.length < 2) return
+  return { orientation, play: { ...play, hinted: [...play.hinted, target.word] } }
+}
+
+export function encodeSession({ puzzle, play }: Session) {
+  return { revision, id: puzzle.id, config: puzzle.config, seed: puzzle.seed, found: play.found, hinted: play.hinted }
+}
+
+export function decodeSession(value: unknown): Session | null {
+  const entry = record(value)
+  if (entry?.revision !== revision || !isConfig(entry.config) || !isSeed(entry.seed)) return null
+  const puzzle = generatePuzzle(entry.config, entry.seed)
+  const allowed = new Set(puzzle.placements.map(({ word }) => word))
+  const { found, hinted } = entry
+  const validWords = (list: unknown): list is string[] =>
+    Array.isArray(list) && list.length <= allowed.size && new Set(list).size === list.length &&
+    list.every((word) => allowed.has(word))
+  if (puzzle.id !== entry.id || !validWords(found) || !validWords(hinted) || hinted.length > hintLimit) return null
+  return { puzzle, play: { found, hinted } }
 }
