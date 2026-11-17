@@ -15,9 +15,8 @@ test('theme is carried into a new key, and legacy, other-site and profile data r
   const storage = memoryStorage([['svet-ugank:r2', old], ['svet-ugank:maze', oldMaze], ['other', 'data']])
   const getStorage = () => storage
   const theme = openSlot(getStorage, 'theme', decodeTheme)
-  const legacy = readLegacy(getStorage, 'svet-ugank:r2')
-  assert.ok(savedGameNotice(false, false, Boolean(legacy.play)))
-  assert.equal(theme.save(decodeTheme(legacy.theme)), true)
+  assert.ok(savedGameNotice(false, false, Boolean(readLegacy(getStorage, 'svet-ugank:r2', 'play'))))
+  assert.equal(theme.save(decodeTheme(readLegacy(getStorage, 'svet-ugank:r2', 'theme'))), true)
   assert.equal(openSlot(getStorage, 'theme', decodeTheme).value, 'dark')
   assert.deepEqual([...storage.data], [
     ['svet-ugank:r2', old],

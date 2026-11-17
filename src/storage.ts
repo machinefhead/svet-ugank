@@ -9,9 +9,9 @@ export function record(value: unknown): Record<string, unknown> | null {
     ? value as Record<string, unknown> : null
 }
 
-export function readLegacy(getStore: GetStore, key: string) {
+export function readLegacy(getStore: GetStore, key: 'svet-ugank:r2' | 'svet-ugank:maze', field: 'theme' | 'play' | 'active') {
   try {
-    return record(JSON.parse(getStore().getItem(key) ?? 'null'))
+    return record(JSON.parse(getStore().getItem(key) ?? 'null'))?.[field]
   } catch {
     return null
   }
@@ -38,10 +38,7 @@ export function openSlot<T>(getStore: GetStore, name: string, decode: (value: un
       }
       invalid = value === null
     }
-    if (!future) {
-      if (raw !== null) store.setItem(key, raw)
-      available = true
-    }
+    available = !future
   } catch {
     // Reads and writes may be restricted by the browser.
   }

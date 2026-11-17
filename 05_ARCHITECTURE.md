@@ -2,9 +2,9 @@
 
 Cilj: čim manj sistemov in odvisnosti, brez prezgodnjega backenda.
 
-- `index.html`, `src/main.ts` in `src/styles.css`: odzivni prikaz, hash navigacija, skupna orodna vrstica in dialogi.
+- `index.html`, `src/main.ts` in `src/styles.css`: odzivni prikaz, hash navigacija, začetni zasloni in skupni dialogi. `src/game-ui.ts` povezuje oba igralna modula z obrazcem in dejanji pod mrežo.
 - `src/wordsearch/` in `src/maze/`: ločeni modeli, generatorji, igralna pravila in prikazi. Preverjanje poti v Labirintu je v neodvisnem modulu `solver.ts`.
-- `src/storage.ts` in `src/maze/storage.ts`: verzionirana lokalna zapisa Osmosmerke in Labirinta. `tests/` vsebuje deterministične ciljne preizkuse.
+- `src/storage.ts`: ločeni verzionirani ključi za temo in seji obeh iger; modula sej preverita obnovljeni napredek. `tests/` vsebuje deterministične ciljne preizkuse.
 - Lokalni paketi, PWA cache in samostojna HTML izdaja ostajajo v načrtu.
 - `reference/`: dokumentirana referenca na V3; prototip ni produkcijski temelj.
 - `server/`: **ni del prvih faz**; rezervirano za prihodnost, če bodo potrebni pravi računi in skupne lestvice.

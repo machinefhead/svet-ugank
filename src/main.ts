@@ -1,5 +1,6 @@
 import './styles.css'
 import { examples, renderDemo, type Game } from './examples.ts'
+import { setupMaze } from './maze/game.ts'
 import type { GameController, GameUI } from './game-ui.ts'
 import { setupWordsearch } from './wordsearch/game.ts'
 import { isTheme, openSlot, readLegacy } from './storage.ts'
@@ -23,7 +24,7 @@ const confirmation = element<HTMLDialogElement>('confirm')
 
 const getStorage = () => window.localStorage
 const storedTheme = openSlot(getStorage, 'theme', (value) => isTheme(value) ? value : null)
-const legacyTheme = storedTheme.value === null ? readLegacy(getStorage, 'svet-ugank:r2')?.theme : null
+const legacyTheme = storedTheme.value === null ? readLegacy(getStorage, 'svet-ugank:r2', 'theme') : null
 theme.value = storedTheme.value ?? (isTheme(legacyTheme) ? legacyTheme : 'system')
 document.documentElement.dataset.theme = theme.value
 if (isTheme(legacyTheme) && !storedTheme.invalid) storedTheme.save(legacyTheme)
@@ -58,7 +59,9 @@ confirmation.addEventListener('close', () => {
   if (confirmation.returnValue === 'accept') run?.()
 })
 
-const controllers: Partial<Record<Game, GameController>> = { wordsearch: setupWordsearch(getStorage, ui) }
+const controllers = {
+  wordsearch: setupWordsearch(getStorage, ui), maze: setupMaze(getStorage, ui),
+}
 const routes: Record<Game, string> = {
   wordsearch: 'osmosmerka', crossword: 'krizanka', sudoku: 'sudoku', maze: 'labirint',
 }
@@ -159,7 +162,7 @@ function renderRoute(focus: boolean) {
 
   const hash = location.hash.slice(1)
   const game = gameIds.find((id) => routes[id] === hash)
-  controller = game ? controllers[game] : undefined
+  controller = game === 'wordsearch' || game === 'maze' ? controllers[game] : undefined
   home.hidden = Boolean(game) || hash === 'igre'
   games.hidden = hash !== 'igre'
   play.hidden = !game
@@ -175,7 +178,7 @@ function renderRoute(focus: boolean) {
   element('play-label').hidden = !demo
   element('setup-title').textContent = controller ? 'Nastavitve igre' : 'V pripravi'
   element('setup-message').textContent = demo ? 'Spodaj je vzorčni prikaz. Reševanje bo na voljo v prihodnji različici.'
-    : controller ? '' : 'Igra je v pripravi.'
+    : ''
   showSetup(focus)
   if (demo) {
     board.hidden = false

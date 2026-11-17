@@ -1,17 +1,15 @@
 # 04 — Lokalni napredek zdaj; pravi računi kasneje
 
-## Trenutna potrjena faza
-- Igranje brez registracije ali strežniškega računa.
-- Izbirni **lokalni vzdevek**, nikoli lažna globalna prijava.
-- Nastavitve, osebna statistika in napredek so v `localStorage`. Za prihodnje večje pakete je predviden IndexedDB.
-- Izvoz/uvoz lastnega napredka kot varnostna kopija, če je izvedljivo v fazi.
-- Opozorilo, da brisanje podatkov brskalnika lahko odstrani lokalni napredek.
-- Brez shranjevanja gesel v datotekah, JavaScriptu, LocalStorage ali Githubu.
-- Lokalna statistika ni javna lestvica.
+## Trenutna potrjena faza (R4)
 
-V R2.1 je povzetek profila na naslovnici pod ilustracijo in gumbom »Začni igrati«. Aplikacija prebere stari zapis `svet-ugank:r2` in ob naslednjem shranjevanju zapiše shemo 2. Aktivna uganka R2 še naprej uporablja generator revizije 1, vključno z najdenimi besedami, namigi in stanjem ogleda rešitve. Stara nastavitev »Težka« za naslednjo uganko postane »Srednja«. Časi prejšnje revizije so v zgodovini R2, osebni rekordi R2.1 pa veljajo znotraj iste stopnje in so ločeni glede na uporabo namigov.
+- Brskalnik hrani temo ter zadnjo sejo vsake igralne igre v verzioniranih ključih `svet-ugank:r4:theme`, `svet-ugank:r4:wordsearch` in `svet-ugank:r4:maze`. Ob nedostopni shrambi napredek ostane v trenutnem zavihku.
+- Iz zapisa R2 se prenese veljavna tema. Stare igralne mreže so nezdružljive z generatorjema R4. Ob obstoječi stari seji aplikacija pokaže obvestilo na začetnem zaslonu.
+- Stara ključa `svet-ugank:r2` in `svet-ugank:maze` z zgodovinskimi vzdevki in rezultati ostaneta nedotaknjena. R4 dostopa zgolj do stare teme in podatka o obstoju stare seje.
+- Podatki so vezani na izvor strani. Brisanje podatkov brskalnika lahko odstrani lokalni napredek. Izvoz in uvoz sta prihodnji možnosti.
 
-Labirint uporablja ločen ključ `svet-ugank:maze`. Aktivno mrežo obnovi iz konfiguracije, semena in revizije, skupaj s položajem, prehojeno sledjo, koraki, namigi in stanjem zaključka oziroma ogleda rešitve. Rezultat se zapiše enkrat na ID uganke, čas je informativen ter vključuje premore. Ponoven začetek iste uganke ohrani označbo ogleda in število namigov. Povzetek na naslovnici loči zaključke z namigi in brez njih. Podatki so vezani na izvor strani, zato sta localhost in GitHub Pages ločeni shrambi.
+## Zgodovina (R2–R3)
+
+R2.1 je na naslovnici prikazoval lokalni vzdevek, zgodovino R2 ter rekorde R2.1 po stopnji in uporabi namigov. R3 je dodal ločeno shrambo Labirinta z ogledanim stanjem rešitve, koraki, namigi in lokalnimi časi. Sprememba R4 je datirana v [registru odločitev](08_DECISIONS.md).
 
 ## Offline igranje
 - Ko ima povezavo, igralec prenese aplikacijo in določen paket ugank (PWA).

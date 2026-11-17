@@ -52,3 +52,11 @@ Novih odločitev ni dovoljeno prikrito izvajati kot že potrjenih.
 - Osnovni Labirint na telefonu prikazuje celotno mrežo; povečava je namerna dodatna možnost. Ker so velika polja v pregledu fizično premajhna za dotik, mora biti mogoče premikanje s smernim potegom kjerkoli po mreži in s smernimi gumbi. Rešitev mora biti vidna kot celota in izrazito označena.
 - V vseh igrah so nastavitve nad mrežo; gumb »Vse igre« je desno od naslova in ni podvojene povezave »Domov«. Značka stanja stoji desno od podnaslova.
 - Nova Osmosmerka ima neodvisno velikost, težavnost, dovoljene smeri ter količino besed; spremembe se uveljavijo šele ob »Nova uganka«. Obstoječi shranjeni primeri brez dodatnih nastavitev ohranijo stare algoritme in ID-je. Teme besed kasneje.
+
+## Potrjeno 17. 11. 2026 — R4
+
+- Lastnik je potrdil začetne zaslone z nastavitvami, izrecen zagon, ločeno nadaljevanje in zamenjavo nedokončane uganke po potrditvi. Med igranjem je prikazana samo izbrana igra z navodili in dejanji.
+- Osmosmerka in Labirint sta ponovno izvedena. Križanka in Sudoku ostajata DEMO. »Križec-krožec«, »Štiri v vrsto« in »Zračni hokej« so pasivne napovedi v katalogu.
+- Lokalni vzdevek, časi in zgodovina osebnih rezultatov so za to fazo odstranjeni iz vmesnika in shranjevanja. Stari ključi ostanejo v brskalniku. R4 prenese temo, vodi nove seje pod ločenimi ključi in ob nezdružljivi stari uganki ponudi nov začetek. O profilih in računih se lahko znova odloča kasneje.
+- Ogled rešitve je začasen in ohrani napredek. Čestitka ob dokončanju ostane.
+- R4 se preda kot Draft PR iz nove veje na osnovi osveženega main. PR #6 ostane ločen, pregled in morebitno združitev izvede lastnik.

@@ -11,7 +11,7 @@ import { complete, decodeSession, encodeSession, nextHint, selectWord, type Sess
 export function setupWordsearch(getStorage: () => Storage, ui: GameUI): GameController {
   const slot = openSlot(getStorage, 'wordsearch', decodeSession, encodeSession)
   let session = slot.value
-  const hasLegacy = !session && Boolean(readLegacy(getStorage, 'svet-ugank:r2')?.play)
+  const hasLegacy = !session && Boolean(readLegacy(getStorage, 'svet-ugank:r2', 'play'))
   let mode = session?.puzzle.config.mode ?? 'classic'
   let difficulty = session?.puzzle.config.mode === 'classic' ? session.puzzle.config.difficulty : 'starter'
   let custom: Config = session?.puzzle.config.mode === 'custom' ? session.puzzle.config :

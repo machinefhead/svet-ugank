@@ -5,6 +5,7 @@
 Cilj: lahka, lepo oblikovana slovenska igralnica z možnostjo ponavljanja kakovostnih ugank ter kasneje PDF in fizičnih zbirk. Začetni razvoj zajema samo Osmosmerko, pravo skandinavsko Križanko, Sudoku in Labirint.
 
 ## Trenutno
+- R4 za pregled uvaja ločene začetne zaslone in novi izvedbi Osmosmerke ter Labirinta. Veljavno lokalno shranjevanje in zagon sta opisana v [README](README.md).
 - ChatGPT Project »Svet ugank« je ustvarjen; predajni ZIP je dodan v Project.
 - Repozitorij `machinefhead/svet-ugank` je ob preverjanju za R3 javen. Za objavo glej postopek za GitHub Pages v [09_GITHUB_SETUP.md](09_GITHUB_SETUP.md).
 - V3 je neodobren prototip. Nekatere zamisli in algoritme lahko ponovno uporabimo šele po pregledu.
